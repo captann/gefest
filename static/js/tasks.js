@@ -81,8 +81,8 @@ function generatePopupContent(homeData, tasks) {
     const { home_id, home_name, home_address } = homeData;
     const isMobile = window.innerWidth < 768; // Мобильные устройства
 
-  const popupWidth = isMobile ? "200px" : "500px";
-  const popupHeight = isMobile ? "400px" : "700px";
+  const popupWidth = isMobile ? "250px" : "500px";
+  const popupHeight = isMobile ? "350px" : "700px";
     const tasksHtml = tasks.map(task => {
 
         const checked = task.blank === 1 ? "checked" : "";
