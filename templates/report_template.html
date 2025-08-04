@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёт по задачам</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 14px;
+            color: #222;
+            margin: 40px;
+        }
+
+        h2 {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+            color: #2a4b7c;
+        }
+
+        h3 {
+            color: #444;
+            margin-top: 10px;
+        }
+
+        p {
+            margin: 2px 0;
+        }
+
+        .task {
+            margin-left: 40px;
+            margin-bottom: 10px;
+            border-left: 2px solid #ccc;
+            padding-left: 10px;
+        }
+
+        .header {
+            text-align: right;
+            margin-bottom: 30px;
+        }
+
+        .polygons {
+            font-style: italic;
+            margin-bottom: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Отчёт от {{ date }}</h2>
+        <p>Пользователь: {{ login }}</p>
+        <div class="polygons">
+            {% if polygons %}
+                Отчёт сформирован по выбранным областям:<br>
+                {{ polygons.replace('\n', '<br>') | safe }}
+            {% else %}
+                Отчёт сформирован по <strong>всем</strong> полигонам.
+            {% endif %}
+        </div>
+    </div>
+
+    {% for holding in keys %}
+        <h2>{{ holding }}</h2>
+        {% for home_id, tasks in report_data[holding].items() %}
+            {% if tasks %}
+                <h3>🏠 {{ tasks[0].address }}</h3>
+                {% for task in tasks %}
+                    <div class="task">
+                        <p><strong>🆔 ID задачи:</strong> {{ task.task_id }}</p>
+                        <p><strong>📅 Дата:</strong> {{ task.date }}</p>
+                        <p><strong>📝 Проблема:</strong> {{ task.problem }}</p>
+                        <p><strong>✅ Решение:</strong> {{ task.solution }}</p>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+</body>
+</html>

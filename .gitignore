@@ -1,0 +1,42 @@
+# Игнорировать виртуальное окружение
+.venv/
+venv/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.swp
+
+# Файлы ОС
+.DS_Store
+Thumbs.db
+
+# Конфиденциальные файлы
+.env
+*.secret
+*.key
+*.pem
+
+# Jupyter / IPython
+.ipynb_checkpoints/
+
+# PyInstaller
+*.spec
+dist/
+build/
+
+# WeasyPrint временные файлы
+*.pdf
+
+# IDE (VSCode, PyCharm и др.)
+.vscode/
+.idea/
+
+# Файлы миграций, если ненужны
+migrations/
+gefest-key.json

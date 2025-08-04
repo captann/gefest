@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Ошибка ссылки</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/err_hash.css') }}">
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">✖</div>
+        <h2 class="error-message">{{ message }}</h2>
+        <a href="/" class="home-button">На главную</a>
+    </div>
+</body>
+</html>

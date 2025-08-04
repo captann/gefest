@@ -1,0 +1,67 @@
+.floating-button {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;  /* ← поменяли right на left */
+    background-color: #00bfa6;
+    color: #121212;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 60px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 191, 166, 0.4);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    z-index: 9999;
+}
+
+.floating-button:hover {
+    background-color: #009e8e;
+    transform: scale(1.1);
+}
+
+.floating-nav {
+    position: fixed;
+    bottom: 100px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background-color: rgba(40, 40, 40, 0.95);
+    padding: 10px 12px;
+    border-radius: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    z-index: 9999;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.floating-nav a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    font-size: 16px;
+    color: #e0f7f4;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.floating-nav a:hover {
+    background-color: rgba(0, 191, 166, 0.15);
+    transform: scale(1.03);
+}
+
+.floating-nav .icon {
+    font-size: 20px;
+}
+
+.floating-nav .label {
+    font-size: 14px;
+}
+
+.hidden-address {
+    display: none !important;
+}

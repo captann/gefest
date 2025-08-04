@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Поделиться</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/share_page.css') }}">
+</head>
+<body>
+    <div id="share-container">
+        <h2>Проверочный код</h2>
+        <p>Запомните или скопируйте этот код — он понадобится, чтобы добавить область.</p>
+
+        <div class="code-input-container">
+            {% for digit in code %}
+                <input type="text" class="code-digit" value="{{ digit }}" readonly>
+            {% endfor %}
+        </div>
+
+        <p class="note">Ссылка одноразовая. Не закрывайте страницу, пока не скопируете.</p>
+
+        <button id="copy-close-btn" class="btn">Скопировать и закрыть</button>
+        <p id="copy-link-only" class="link-only">Скопировать только ссылку</p>
+
+    </div>
+    <div id="copy-toast" class="copy-toast hidden">Скопировано в буфер обмена</div>
+
+    <p id="link" hidden> {{link}}</p>
+    <p id="user-login" hidden>{{ user.login }}</p>
+    <script src="{{ url_for('static', filename='js/share_page.js') }}"></script>
+</body>
+</html>

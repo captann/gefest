@@ -1,0 +1,39 @@
+.mode-switcher {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin: 10px auto;
+    background: none; /* фон убираем, если нужно */
+    padding: 0;
+}
+
+.mode-radio {
+    display: none;
+}
+
+.mode-label {
+    width: 40%;
+    padding: 10px 0;
+    text-align: center;
+    border-radius: 30px;
+    background-color: #555;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.mode-label:hover {
+    background-color: #00bfa6;
+}
+
+.mode-radio:checked + .mode-label {
+    background-color: #00bfa6;
+    transform: scale(1.05);
+}
+
+.mode-radio:checked + .mode-label:hover {
+    background-color: #008c7a;
+}

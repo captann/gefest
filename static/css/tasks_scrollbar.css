@@ -1,0 +1,32 @@
+#scroll-progress-bar:hover {
+    filter: brightness(1.2);
+}
+
+
+#scroll-progress-bar {
+    height: 4px;
+    min-height: 4px;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.1); /* фон клика */
+    border-radius: 2px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    position: relative;
+}
+
+#scroll-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, #00aaff, #00ffaa);
+    border-radius: 2px;
+    transition: width 0.2s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* Скрытие скролл-бара (опционально) */
+#tasks-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}

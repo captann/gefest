@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация</title>
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .register-container {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.7);
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px;
+        }
+
+        .register-container h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #00bfa6;
+        }
+
+        .register-container input[type="text"],
+        .register-container input[type="password"] {
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 5px;
+            background: #2a2a2a;
+            color: #fff;
+            outline: none;
+            transition: border-color 0.3s;
+            width: 100%;
+        }
+
+        .register-container input[type="text"]:focus,
+        .register-container input[type="password"]:focus {
+            border-color: #00bfa6;
+        }
+
+        .register-container button {
+            padding: 10px;
+            background: #00bfa6;
+            border: none;
+            border-radius: 5px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .register-container button:hover {
+            background: #00a38f;
+        }
+
+        .error-message {
+            color: #ff4d4d;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .login-link {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .login-link a {
+            color: #00bfa6;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 400px) {
+            .register-container {
+                padding: 20px;
+            }
+
+            .register-container button {
+                font-size: 14px;
+            }
+
+            .login-link {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<form class="register-container" method="POST">
+    <h2>Регистрация</h2>
+
+    {% if error %}
+        <div class="error-message">{{ error }}</div>
+    {% endif %}
+
+    <input type="text" name="login" placeholder="Логин" required>
+    <input type="password" name="password" placeholder="Пароль" required>
+    <input type="password" name="confirm_password" placeholder="Повторите пароль" required>
+
+    <button type="submit">Зарегистрироваться</button>
+
+    <div class="login-link">
+        Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a>
+    </div>
+</form>
+
+</body>
+</html>

@@ -1,0 +1,135 @@
+/* Контейнер задач растягивается по высоте */
+#tasks-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+}
+
+/* Контейнер поиска */
+.search-container {
+    width: 100%;
+}
+
+/* Поля поиска и селектора */
+.search-container input,
+.search-select,
+.area-search {
+    width: 100%;
+    padding: 8px;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 5px;
+    color: #fff;
+    margin-top: 8px;
+    outline: none;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+
+.search-container input:focus,
+.area-search:focus,
+.search-select:focus {
+    border-color: #00bfa6;
+}
+
+/* Заголовок */
+.panel-title {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    text-align: center;
+}
+
+/* Контейнер задач (растягиваемый блок) */
+#tasks-list {
+    flex-grow: 1;
+    overflow-y: auto;
+    background: #2a2a2a;
+    border-radius: 5px;
+    padding: 0;
+    width: 100%;
+    min-height: 0; /* важно для scroll */
+    padding: 10px 0 40px 0; /* нижний отступ для футера */
+
+}
+
+/* Список задач */
+#tasks-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Задачи */
+#tasks-list li {
+    padding: 8px;
+    color: #fff;
+    font-size: 16px;
+}
+#blok_pannel > div div  {
+    font-size: 16px;
+}
+
+.task-item {
+    border-bottom: 1px solid rgb(68, 68, 68);
+}
+
+/* Сообщения об ошибке */
+#h4_tasks_error {
+    color: #ff4d4d;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+/* Скрытие скролл-бара (опционально) */
+#tasks-list::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+.search-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Обёртка над двумя селектами */
+.search-select-group {
+    display: flex;
+    gap: 10px;                /* расстояние между селектами */
+    padding-left: 8px;        /* отступ слева */
+    padding-right: 8px;       /* отступ справа */
+    box-sizing: border-box;   /* чтобы padding не влиял на ширину */
+    width: 100%;              /* на всю доступную ширину */
+}
+
+
+/* Оба селекта будут равной ширины */
+.search-select-group .search-select {
+    flex: 1;
+    padding: 8px;
+    background: #2a2a2a;
+    border: 1px solid #333;
+    border-radius: 5px;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.3s;
+    box-sizing: border-box;
+}
+.link-only {
+    color: #aaa;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 14px;
+    transition: color 0.2s ease;
+    text-align: center;
+}
+.link-only:hover {
+    color: #aaa;
+}
+

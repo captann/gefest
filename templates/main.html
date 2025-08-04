@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Карта</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pannel_title.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mode_switcher.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/task_search_and_list.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/areas.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tasks_scrollbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/areas_scrollbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/drag_resize.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/loading_overlay.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/areas_action_buttons.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_adaptation.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_button.css') }}">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+
+
+
+</head>
+<body>
+    <div id="loading-overlay">
+        <div class="loading-content">
+            <svg class="loader-img" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="35" stroke="#00bfa6" stroke-width="8" fill="none"
+                stroke-dasharray="164.93361431346415 56.97787143782138">
+                <animateTransform attributeName="transform" type="rotate"
+                  repeatCount="indefinite" dur="3s" values="0 50 50;360 50 50"
+                  keyTimes="0;1"/>
+              </circle>
+            </svg>
+            <h2>Обновляем карту...</h2>
+            <p>Пожалуйста, подождите</p>
+        </div>
+    </div>
+    <div id="main-container">
+        <div id="blok_pannel">
+            <div id="user-bar">
+                <div class="user-item left">
+                    {% if user.role == 'admin' %}
+                        <a href="/admin">👑</a>
+                    {% else %}
+                        🔧
+                    {% endif %}
+                    {{ user.login }}
+                </div>
+                <div class="user-item center">
+                    <a href="https://forms.yandex.ru/u/686c1c5b02848fb6f2036cab/" target="_blank">
+                        Обратная связь
+                    </a>
+                </div>
+                <div class="user-item right">
+                    <a href="/logout">Выйти</a>
+                </div>
+            </div>
+            <h3 class="panel-title">Панель управления</h3>
+            <div class="mode-switcher">
+                <input type="radio" id="tasks-mode" name="mode" class="mode-radio" checked="" onchange="enterMapMode(this)">
+                <label for="tasks-mode" class="mode-label">Задачи</label>
+                <input type="radio" id="areas-mode" name="mode" class="mode-radio" onchange="enterMapMode(this)">
+                <label for="areas-mode" class="mode-label">Области</label>
+            </div>
+            <div id="tasks-container" class="mode-container" >
+                <div class="search-container">
+                    <input type="text" id="search-input" class="search-input" placeholder="Введите ID или адрес...">
+
+                    <div class="search-select-group">
+                        <select id="search-type" class="search-select">
+                            <option value="id">По ID задачи</option>
+                            <option value="address">По адресу</option>
+                        </select>
+
+                        <select id="holding-filter" class="search-select">
+                            <option value="all">Все холдинги</option>
+                        </select>
+                    </div>
+                    <p id="generate-report-link" class="link-only">Отчёт по холдингам</p>
+
+
+            </div>
+
+                <h4  class="panel-title" id="task-title">Список объектов</h4>
+                <div id="scroll-progress-bar" style="display:none;">
+                    <div id="scroll-progress-fill"></div>
+                </div>
+
+
+                <div id="tasks-list">
+                    <ul id="homes-list"></ul>
+
+                </div>
+            </div>
+            <!-- Контейнер областей -->
+            <button class="btn" onclick="initPolygonDrawing()" id="add-area-btn" style="margin-bottom:15px;padding: 8px;" hidden>Добавить область</button>
+            <div class="search-container">
+                <input type="text" id="area-search" class="search-input" placeholder="Введите название области..." hidden >
+            </div>
+             <h4  class="panel-title" hidden id="area-title">Список областей</h4>
+            <div id="area-scroll-progress-bar" style="display:none;">
+                <div id="area-scroll-progress-fill"></div>
+            </div>
+            <div id="areas-container" class="mode-container" style="display:none;width:100%;">
+                <div class="select-all" style="margin-bottom:10px;display:none;" >
+                    <input type="checkbox" id="select-all-areas">
+                    <label for="select-all-areas">Выбрать все</label>
+                </div>
+
+                <div id="areas-list">
+                </div>
+            </div>
+            <!-- Контейнер создания полигона -->
+            <div id="areas-create-container" style="display:none;width:100%;">
+                <p id="area-message">
+                    Задайте область инструментами карты (пятиугольник).<br><br>
+                    Начальная и конечная точки должны совпасть.
+                </p>
+                <div class="search-container">
+                    <input type="text" id="area-name" class="area-search" placeholder="Введите название области" style="display: none;">
+                    <label id="color-label" style="display:none; margin-top:5px;"></label>
+                </div>
+                Цвет области:
+                <input type="color" id="area-color">
+                <button id="cancel-area-btn" class="btn" style="margin-top: 10px; background: #6c757d; color: white;">Отмена</button>
+                <div id="area-buttons" style="display: none;">
+                    <button id="save-area-btn" class="btn" style="margin-top: 10px;">Сохранить</button>
+                </div>
+            </div>
+            <footer class="footer" id="footer">
+                <span>Сделано СЗАО. β-версия.</span>
+                <a class="link-only" href="/about" id="help" target="_blank" style="font-size:14px;">Помощь</a>
+            </footer>
+
+        </div>
+        <div id="resizer"></div>
+        <div id="map_">
+        </div>
+        <div id="mobile_panel" style="display:none;" >
+            <input type="text" placeholder="Поиск..." />
+            <div>
+                <label><input type="radio" name="mode" value="tasks"><i>📋</i></label>
+                <label><input type="radio" name="mode" value="zones"><i>📍</i></label>
+            </div>
+    </div>
+    </div>
+
+    <script>const houses_colors = {{ houses_colors | tojson }};
+            const polygonsData = {{ polygonsData | tojson }};
+            let homes = {{ homes | tojson }};
+            let tasks = {{ tasks | tojson }};
+            let user = {{ user | tojson }};
+            let holdings = [];
+            let holdingsDict = {};
+    </script>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+
+    <script src="{{ url_for('static', filename='js/init_map.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/polygondrawing.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/click_worker.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/task_search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/areas_list.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/areas_search.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+
+    <script src="{{ url_for('static', filename='js/tasks_scrollbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/areas_scrollbar.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/drag_to_resize.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/loading.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/adaptation_to_mobile.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/polygons.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/generate_report.js') }}"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,323 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+
+    body {
+        background: #121212;
+        color: #fff;
+        font-family: 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+    }
+
+    #blok_pannel {
+        background: #1e1e1e;
+        color: #fff;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.7);
+        border-right: 1px solid #333;
+    }
+
+    #blok_pannel h3,
+    #blok_pannel h4,
+    .area-title {
+        color: #00bfa6;
+    }
+
+.mode-switcher {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 400px; /* Ограничиваем максимальную ширину */
+    margin: 0 auto; /* Центрируем блок */
+    background-color: #333;
+    border-radius: 30px;
+    padding: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.mode-radio {
+    display: none; /* Скрываем стандартные радиокнопки */
+}
+
+.mode-label {
+    padding: 7px 15px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #fff;
+    background-color: #555;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.mode-label:hover {
+    background-color: #00bfa6; /* Цвет при наведении */
+}
+
+.mode-radio:checked + .mode-label {
+    background-color: #00bfa6; /* Цвет активной кнопки */
+    transform: scale(1.1); /* Легкое увеличение при активации */
+}
+
+.mode-radio:checked + .mode-label:hover {
+    background-color: #008c7a; /* Более тёмный цвет при активной кнопке */
+}
+
+
+    .search-container input,
+    .search-select,
+    .area-search {
+        width: 100%;
+        padding: 8px;
+        background: #2a2a2a;
+        border: 1px solid #333;
+        border-radius: 5px;
+        color: #fff;
+        margin-top: 8px;
+        outline: none;
+        transition: border-color 0.3s;
+    }
+
+    .search-container input:focus,
+    .area-search:focus,
+    .search-select:focus {
+        border-color: #00bfa6;
+    }
+
+    .btn {
+        padding: 10px;
+        background: #00bfa6;
+        border: none;
+        border-radius: 5px;
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+
+    .btn:hover {
+        background: #00a38f;
+    }
+
+    #area-color {
+        margin-left: 5px;
+    }
+
+    a[href="/logout"] {
+        color: #ff4d4d;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    a[href="/logout"]:hover {
+        text-decoration: underline;
+    }
+
+    #tasks-list,
+    #areas-list {
+        background: #2a2a2a;
+        padding: 10px;
+        border-radius: 5px;
+        max-height: 400px;
+        overflow-y: inherit;
+    }
+
+    #h4_tasks_error,
+    #h4_areas_error {
+        color: #ff4d4d;
+    }
+
+    .select-all label {
+        color: #fff;
+    }
+
+    /* Дополнительно затемняем задний фон страницы за пределами панели */
+    #loading-overlay {
+        background: rgba(18, 18, 18, 0.95);
+        color: #fff;
+    }
+    #search-type {
+    padding: 10px;
+    border: 1px solid #333;
+    border-radius: 5px;
+    background: #2a2a2a;
+    color: #fff;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+#search-type:focus {
+    border-color: #00bfa6;
+    background: #3a3a3a;
+}
+/* По умолчанию (десктоп) — красивый тёмный скроллбар */
+#blok_pannel::-webkit-scrollbar {
+    width: 8px;
+}
+
+#blok_pannel::-webkit-scrollbar-track {
+    background: #1e1e1e;
+    border-radius: 4px;
+}
+
+#blok_pannel::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+    transition: background 0.3s;
+}
+
+#blok_pannel::-webkit-scrollbar-thumb:hover {
+    background: #00bfa6;
+}
+
+#blok_pannel {
+    scrollbar-color: #444 #1e1e1e; /* Firefox */
+    scrollbar-width: thin;
+}
+
+#blok_pannel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 25%;
+    height: 100%;
+    background: #2a2a2a;
+    padding: 15px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    z-index: 1000;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column; /* если у тебя несколько элементов сверху вниз */
+    align-items: center;
+}
+
+
+    /* Хедер с кнопкой "Выйти" */
+    #blok_pannel > div {
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    #blok_pannel > div div {
+        font-size: 18px;
+    }
+
+    #blok_pannel a {
+        font-size: 16px;
+    }
+
+    /* Заголовки */
+    #blok_pannel h3,
+    #blok_pannel h4,
+    #blok_pannel .area-title {
+        font-size: 18px;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    /* Поля ввода и селекты */
+    .search-input,
+    .search-select,
+    #area-search,
+    #area-name {
+        width: 100%;
+        font-size: 16px;
+        padding: 8px;
+        margin-top: 10px;
+    }
+
+    /* Список задач и областей */
+    #tasks-list,
+    #areas-list {
+        width: 100%;
+        max-height: 40%;
+    }
+
+    /* Элементы списка */
+    #tasks-list div
+     {
+        font-size: 16px;
+        padding: 8px;
+    }
+
+    /* Кнопки */
+    .btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+
+
+
+
+#area-message {
+    color: #fff;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-top: 10px;
+}
+#add-area-btn {
+    padding: 10px;
+    background: #00bfa6;
+    border: none;
+    border-radius: 5px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#add-area-btn:hover {
+    background: #00a38f;
+}
+.footer {
+    margin-top: 20px;
+    padding: 10px 0;
+    text-align: center;
+    color: #aaa;
+    font-size: 14px;
+    background-color: #2a2a2a;
+}
+
+.folium-map {
+    left: 25% !important;
+    width: 75% !important;
+    height: 100% !important;
+    position: relative;
+}
+@media (max-width: 768px) {
+    .folium-map {
+        left: 0 !important;
+        width: 100% !important;
+        height: 50% !important;
+        position: absolute; /* или fixed, если нужно закрепить */
+        top: 0;
+    }
+
+    #blok_pannel {
+        width: 100% !important;
+        position: absolute;
+        top: 50%; /* Сразу под картой */
+        padding: 20px; /* отступы со всех сторон */
+        box-sizing: border-box; /* чтобы padding не влиял на ширину */
+
+}
+.task-item {
+border-bottom: 1px solid #444
+}
+
+#blok_pannel {
+    align-items: stretch;
+}
+
+.search-container {
+    width: 100%;
+}

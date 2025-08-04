@@ -1,0 +1,23 @@
+#add-area-btn {
+    padding: 10px;
+    background: #00bfa6;
+    border: none;
+    border-radius: 5px;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#add-area-btn:hover {
+    background: #00a38f;
+}
+.btn {
+        width: 100%;
+        padding: 10px;
+        font-size: 16px;
+        margin-top: 10px;
+    }
+.area-title {
+    text-align: center;
+}

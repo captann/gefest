@@ -1,0 +1,15 @@
+.warn-banner {
+    display: none;
+    color: orange;
+    background-color: #2a2a2a;
+    border-left: 5px solid orange;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 0.95em;
+    font-weight: bold;
+  }
+
+  .warn-banner .icon {
+    color: gold;
+    margin-right: 8px;
+  }

@@ -1,0 +1,49 @@
+/* 🔍 Масштабируем элементы Leaflet карты */
+.mobile-map #map_ {
+  font-size: 1em;
+}
+
+.mobile-map .leaflet-control {
+  transform: scale(1.3);
+  transform-origin: top left;
+}
+
+.mobile-map .leaflet-control-container .leaflet-top,
+.mobile-map .leaflet-control-container .leaflet-bottom {
+  margin: 10px;
+}
+
+/* 🧭 Увеличиваем элементы панели */
+.mobile-panel #blok_pannel p,
+.mobile-panel #blok_pannel span,
+.mobile-panel #blok_pannel label,
+.mobile-panel #blok_pannel input,
+.mobile-panel #blok_pannel select,
+.mobile-panel #blok_pannel button,
+.mobile-panel #blok_pannel .panel-title,
+ #help {
+  font-size: 1.2em !important;
+}
+
+.mobile-panel #blok_pannel .search-input,
+.mobile-panel #blok_pannel .search-select {
+  padding: 10px !important;
+}
+
+/* Для мобильной адаптации */
+.mobile-map .leaflet-popup-content .popup-mobile {
+  font-size: 1em;
+  line-height: 1.4;
+}
+
+.mobile-map .leaflet-popup-content .popup-mobile button {
+  font-size: 1em;
+}
+
+.mobile-map .leaflet-popup-content .popup-mobile label {
+  font-size: 1em;
+}
+
+.mobile-map .leaflet-popup-content .popup-mobile p {
+  font-size: 1.2em;
+}

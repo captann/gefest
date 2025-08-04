@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление заявками и ролями</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mode_switcher.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/back.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/warn_banner.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <style>
+        .checkbox-cell {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+
+        .source-link {
+    color: #fff; /* или white */
+    font-size: 1.1rem; /* можно 16px или больше */
+    text-decoration: none; /* убирает подчёркивание, если не нужно */
+    font-weight: 500;
+    display: inline-block;
+    margin-bottom: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.source-link:hover {
+    color: #aaa; /* ярче при наведении */
+    text-decoration: underline; /* если хочешь при наведении */
+}
+
+        body {
+            background: #121212;
+            color: #fff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #1e1e1e;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.6);
+        }
+
+        h2 {
+            color: #00bfa6;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            color: #ccc;
+        }
+
+        input[type="text"],
+        input[type="file"],
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #fff;
+            font-size: 16px;
+
+
+        }
+
+        button {
+            background-color: #00bfa6;
+            color: #121212;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #009e8e;
+            transform: scale(1.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #444;
+            text-align: left;
+        }
+
+        th {
+            background-color: #222;
+            cursor: pointer;
+            position: relative;
+        }
+
+        th.sorted {
+            background-color: #00bfa6;
+            color: #121212;
+        }
+
+        th.sorted::after {
+            content: attr(data-arrow);
+            position: absolute;
+            right: 10px;
+        }
+
+        .task-header {
+            display: block; /* ⬅ меняем с flex на block */
+            margin-top: 30px;
+        }
+
+        .task-block {
+            width: 100%;     /* ⬅ каждая таблица занимает всю ширину */
+            margin-bottom: 30px;
+        }
+
+
+        .task-filter {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .task-header {
+                flex-direction: column;
+            }
+            .task-block {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+            .task-filter {
+                flex-direction: column;
+            }
+        }
+        th {
+    background-color: #222;
+    cursor: pointer;
+    position: relative;
+    user-select: none; /* ← добавлено */
+}
+
+
+
+    </style>
+    <style>
+        #loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #1e1e1e;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease;
+}
+
+#loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loading-content {
+  text-align: center;
+  color: white;
+}
+
+.loading-content h2 {
+  margin: 15px 0 5px;
+  color: #00bfa6;
+}
+
+.loading-content p {
+  margin: 0;
+  font-size: 1.1em;
+}
+
+    </style>
+</head>
+<body>
+<div id="loading-overlay" style="display:none;">
+  <div class="loading-content">
+    <svg class="loader-img" xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="35" stroke="#00bfa6" stroke-width="8" fill="none"
+        stroke-dasharray="164.93361431346415 56.97787143782138">
+        <animateTransform attributeName="transform" type="rotate"
+          repeatCount="indefinite" dur="3s" values="0 50 50;360 50 50" keyTimes="0;1" />
+      </circle>
+    </svg>
+    <h2>Загружаем данные...</h2>
+    <p>Пожалуйста, подождите</p>
+  </div>
+</div>
+<div id="main-container">
+    <div class="container">
+        <h2 id="upload-section">Загрузка заявок</h2>
+        <div id="warninfo" class="warn-banner">
+            <span class="icon">⚠️</span> Загрузка задач прервана: требуется подтверждение или уточнение некоторых адресов
+        </div>
+
+
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <div class="mode-switcher">
+            <input type="radio" id="file-mode" name="mode" class="mode-radio" checked>
+            <label for="file-mode" class="mode-label">Из файла</label>
+            <input type="radio" id="link-mode" name="mode" class="mode-radio">
+            <label for="link-mode" class="mode-label">Из ссылки</label>
+        </div>
+
+        <label for="sheetName">Название листа:</label>
+        <input type="text" name="sheetName" id="sheetName" required>
+        <div id="headerMappingSection" style="margin-top: 20px;">
+      <h3>Настройка столбцов таблицы</h3>
+      <div class="header-mapping-group">
+        <label>ID задачи:</label>
+        <select name="col_task_id" required></select>
+      </div>
+      <div class="header-mapping-group">
+        <label>Дата:</label>
+        <select name="col_date" required></select>
+      </div>
+      <div class="header-mapping-group">
+        <label>Адрес:</label>
+        <select name="col_address" required></select>
+      </div>
+      <div class="header-mapping-group">
+        <label>Проблема:</label>
+        <select name="col_problem" required></select>
+      </div>
+      <div class="header-mapping-group">
+        <label>Решение:</label>
+        <select name="col_solution" required></select>
+      </div>
+      <div class="header-mapping-group">
+        <label>Подписан ли бланк:</label>
+        <select name="col_signed" required></select>
+      </div>
+      <div class="header-mapping-group">
+        <label>Значение подписанного бланка:</label>
+        <input type="text" name="signed_value" placeholder="например: Да" required value="Да">
+      </div>
+    </div>
+
+
+        <!-- 📁 Блок для файла -->
+        <div id="fileUploadSection">
+            <label for="excelFile">Выберите .xlsx файл (макс. 10 МБ):</label>
+            <input type="file" name="excelFile" id="excelFile" accept=".xlsx" required>
+        </div>
+
+        <!-- 🔗 Блок для ссылки (изначально скрыт) -->
+        <div id="linkUploadSection" style="display: none;">
+            <label for="sheetLink">Ссылка на Google-таблицу:</label>
+            <input type="text" name="spreadsheetLink" id="sheetLink" placeholder="https://docs.google.com/spreadsheets/..." value="https://docs.google.com/spreadsheets/d/1i6XreBzCqaFlfUAAJ2DRBZO2HrxnPDzh3HDIpl6fWH8">
+            <p id="copyNote" style="color: #aaa; font-size: 0.9em; margin-top: 5px; cursor: pointer;" >
+        Добавьте аккаунт <b id="copyEmail" style="color: orange">id-472@gefest-466717.iam.gserviceaccount.com</b> в доступ к таблице
+    </p>
+
+
+        </div>
+
+        <button type="submit" id="uploadBtn">Загрузить</button>
+        <div id="uploadStatus"></div>
+    </form>
+    <div id="existingTasksTableSection" style="display: none; margin-top: 20px;">
+
+        <div  class="warn-banner" style="display: block;">
+            <span class="icon">⚠️</span>Требуется уточнение ранее загруженных задач
+        </div>
+
+
+
+        <input type="text" id="taskSearchInput" placeholder="Поиск по ID задачи..." style="margin-bottom: 10px; width: 100%; padding: 5px;">
+
+        <form id="existingTasksForm">
+                    <button type="submit" style="margin-top: 15px;">Применить</button>
+
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>ID задачи</th>
+                        <th>
+                            <label><input type="checkbox" id="checkAllBlank" checked> Выполнена</label>
+                        </th>
+                        <th>
+                            <label><input type="checkbox" id="checkAllArchive" checked> В архиве</label>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="existingTasksTableBody"></tbody>
+            </table>
+
+        </form>
+    </div>
+
+
+    <div id="addressFixContainer"></div>
+            <h2 id="sync">Синхронизация</h2>
+
+    <div id="sync-section" style="margin-top: 40px;">
+
+        <label for="syncSheetName">Название листа:</label>
+        <input type="text" name="sheetName" id="syncSheetName" required>
+
+
+        <div id="syncHeaderMappingSection" style="margin-top: 20px;">
+      <h3>Настройка столбцов таблицы (для синхронизации)</h3>
+
+      <div class="header-mapping-group">
+        <label for="sync_col_task_id">ID задачи:</label>
+        <select id="sync_col_task_id" name="sync_col_task_id" required></select>
+      </div>
+
+      <div class="header-mapping-group">
+        <label for="sync_col_signed">Подписан ли бланк:</label>
+        <select id="sync_col_signed" name="sync_col_signed" required></select>
+      </div>
+      <div class="header-mapping-group">
+        <label for="sync_signed_value">Значение подписанного бланка:</label>
+        <input type="text" id="sync_signed_value" name="sync_signed_value" placeholder="например: Да" required value="Да">
+      </div>
+    </div>
+        <label for="syncSheetLink">Ссылка на Google-таблицу:</label>
+        <input type="text" id="syncSheetLink" placeholder="https://docs.google.com/spreadsheets/..." value="https://docs.google.com/spreadsheets/d/1i6XreBzCqaFlfUAAJ2DRBZO2HrxnPDzh3HDIpl6fWH8">
+        <p id="copyNote2" style="color: #aaa; font-size: 0.9em; margin-top: 5px; cursor: pointer;">
+        Добавьте аккаунт <b id="copyEmail2" style="color: orange;">id-472@gefest-466717.iam.gserviceaccount.com</b> в доступ к таблице
+        </p>
+
+
+
+        <button id="syncButton" onclick="startSync()">Синхронизировать</button>
+        <span id="syncStatus" style="margin-left: 10px;"></span>
+    </div>
+
+        <h2 id="roles-section">Роли</h2>
+        <table>
+            <thead>
+                <!-- <tr>
+                    <th>Логин</th>
+                    <th>Роль</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_id, user_data in users.items() %}
+                {% set username = user_data['login'] %}
+                {% set role = user_data['role'] %}
+                <tr>
+                    <td>{{ username }}</td>
+                    <td>
+                        <select name="role_{{ user_id }}" data-user-id="{{ user_id }}" data-original-role="{{ role }}" onchange="handleRoleChange(this)">
+                            <option value="user" {% if role == 'user' %}selected{% endif %}>user</option>
+                            <option value="admin" {% if role == 'admin' %}selected{% endif %}>admin</option>
+                        </select>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h2 style="margin-top: 30px;"id="addresses-section">Адреса</h2>
+
+    <input type="text" id="addressSearch" placeholder="Поиск ..." >
+        <div id="allAddressesContainer"></div>
+
+
+        <h2 id="tasks-section">Задачи</h2>
+        <div class="task-filter">
+            <input type="text" id="taskSearch" placeholder="Поиск...">
+            <select id="searchType">
+                <option value="id">По ID</option>
+                <option value="address">По адресу</option>
+            </select>
+        </div>
+        <div style="margin-top: 10px;">
+            <label style="cursor: pointer;">
+                <input type="checkbox" id="autoArchiveToggle" {% if settings and settings.auto_archive_done_tasks %}checked{% endif %}>
+                Автоматически архивировать выполненные задачи
+            </label>
+        </div>
+
+
+
+        <div class="task-header">
+            <div class="task-block">
+                <h3 class="area-title">Несделанные задачи</h3>
+                <table id="tasksNotTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTasks('tasksNot', 'task_id')">Номер</th>
+                            <th onclick="sortTasks('tasksNot', 'address')">Адрес</th>
+                            <th onclick="sortTasks('tasksNot', 'date')">Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tasksNotBody"></tbody>
+                </table>
+            </div>
+
+            <div class="task-block">
+                <h3 class="area-title">Сделанные задачи</h3>
+                <table id="tasksDoneTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTasks('tasksDone', 'task_id')">Номер</th>
+                            <th onclick="sortTasks('tasksDone', 'address')">Адрес</th>
+                            <th onclick="sortTasks('tasksDone', 'date')">Дата</th><th>
+                            <input type="checkbox"
+           id="archiveAllCheckbox"
+           onchange="toggleAllArchives(this)"
+           {% if main_state %}checked{% endif %}>
+                    В архиве
+
+                </th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="tasksDoneBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <a href="/" class="floating-button" title="На главную">
+        🏠
+    </a>
+    <div class="floating-nav">
+        <a href="#upload-section"><span class="icon">📥</span><span class="label">Загрузка</span></a>
+        <a href="#sync"><span class="icon">🔄</span><span class="label">Синхронизация</span></a>
+        <a href="#roles-section"><span class="icon">👥</span><span class="label">Роли</span></a>
+        <a href="#addresses-section"><span class="icon">🏠</span><span class="label">Адреса</span></a>
+        <a href="#tasks-section"><span class="icon">✅</span><span class="label">Задачи</span></a>
+
+    </div>
+</div>
+
+
+
+<script>
+const users = {{ users | tojson }};
+const tasks_not = {{ tasks_not | tojson }};
+const tasks_done = {{ tasks_done | tojson }};
+const allAddresses = {{ addresses | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/admin_loading.js') }}"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_select_headers.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_address.js') }}"></script>
+<script src="{{ url_for('static', filename='js/update_address.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_switcher.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_copy_email.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_archieve_worker.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_update_settings.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_generate_addresses.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_search_address.js') }}"></script>
+<script src="{{ url_for('static', filename='js/admin_sync.js') }}"></script>
+<script src="{{ url_for('static', filename='js/already_exist.js') }}"></script>
+<script src="{{ url_for('static', filename='js/update_role.js') }}"></script>
+<!--<script>hideLoading();</script> -->
+</body>
+</html>

@@ -1,0 +1,46 @@
+body {
+    background-color: #1e1e1e;
+    color: #ddd;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.error-container {
+    text-align: center;
+    padding: 40px;
+    background-color: #2a2a2a;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+.error-icon {
+    font-size: 80px;
+    color: #ff4444;
+    margin-bottom: 20px;
+}
+
+.error-message {
+    font-size: 24px;
+    color: #eee;
+    margin-bottom: 30px;
+}
+
+.home-button {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: #ff4444;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.home-button:hover {
+    background-color: #cc0000;
+}
