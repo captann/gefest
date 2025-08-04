@@ -328,7 +328,7 @@ def add_area(hash):
 
 @app.route('/')
 @login_required
-def update_type_search():
+def index():
     current_user = User.get_by_id(session['user_id'])
     if True:
         with DBsession() as dbsession:
