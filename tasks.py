@@ -12,25 +12,7 @@ from urllib.parse import quote_plus
 from app_config import remote, creds_path, YANDEX_MAPS_API_KEY
 
 if remote:
-    cert_path = os.path.expanduser("~/.cloud-certs/root.crt")
-    # Подключение к SQLite
-    # Пароль с экранированием спецсимволов
-    raw_password = r".#;^XIh{fO/2=o"
-    safe_password = quote_plus(raw_password)
-
-    # ✅ Подключение к MySQL через PyMySQL по IP и SSL
-    mysql_url = f"mysql+pymysql://gen_user:{safe_password}@45.139.78.33:3306/default_db"
-
-    mysql_engine = create_engine(
-        mysql_url,
-        connect_args={
-            'ssl_ca': cert_path  # ← ВАЖНО: вместо 'ssl': { 'ca': ... }
-        },
-        echo=True
-    )
-
-    # Создание сессий
-    Session = sessionmaker(bind=mysql_engine)
+    pass
 else:
     sqlite_engine = create_engine('sqlite:///address_new.db')
 

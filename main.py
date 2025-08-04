@@ -5,6 +5,7 @@ import hashlib
 import openpyxl
 from flask import Flask, request, jsonify, render_template, json, redirect, url_for, abort, send_file
 import os
+import secrets
 from models import *
 from flask import send_from_directory
 from flask import Flask, request, jsonify, render_template, json, redirect, url_for, session, make_response
@@ -87,10 +88,10 @@ def update_polygon_state(polygon_id, checked):
 
 
 app = Flask(__name__)
-app.secret_key = 'очень_секретный_ключ'  # Замени на свой
+app.secret_key = APP_SECRET_KEY
 UPLOAD_FOLDER = 'uploads'  # папка, куда сохраняем Excel
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config["TEMPLATES_AUTO_RELOAD"] = True  # Автоматическая перезагрузка шаблонов
+app.config["TEMPLATES_AUTO_RELOAD"] = False  # Автоматическая перезагрузка шаблонов
 
 
 

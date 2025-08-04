@@ -40,3 +40,4 @@ build/
 # Файлы миграций, если ненужны
 migrations/
 gefest-key.json
+key_code.txt
