@@ -3,7 +3,8 @@ const centerLon = 37.61;
 const zoom = 10;
 
 window.map_ = L.map('map_', {
-    attributionControl: false
+    attributionControl: false,
+    zoomControl: window.innerWidth >= 1000
 }).setView([centerLat, centerLon], zoom);
 
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
