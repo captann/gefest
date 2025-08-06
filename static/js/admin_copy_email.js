@@ -1,3 +1,4 @@
+if (user_role_weight > 1) {
 const emailEl = document.getElementById('copyEmail');
 const noteEl = document.getElementById('copyNote');
 
@@ -49,6 +50,7 @@ function attachCopyHandler() {
 }
 
 attachCopyHandler();
+}
 
 const emailEl2 = document.getElementById('copyEmail2');
 const noteEl2 = document.getElementById('copyNote2');

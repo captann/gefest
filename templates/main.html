@@ -44,13 +44,9 @@
         <div id="blok_pannel">
             <div id="user-bar">
                 <div class="user-item left">
-                    {% if user.role == 'admin' %}
-                        <a href="/admin">👑</a>
-                    {% else %}
-                        🔧
-                    {% endif %}
-                    {{ user.login }}
+                    <a href="/control_panel">{{ role_icons.get(user.role, "❓") }}</a> {{ user.login }}
                 </div>
+
                 <div class="user-item center">
                     <a href="https://forms.yandex.ru/u/686c1c5b02848fb6f2036cab/" target="_blank">
                         Обратная связь

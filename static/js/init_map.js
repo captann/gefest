@@ -8,7 +8,7 @@ window.map_ = L.map('map_', {
 }).setView([centerLat, centerLon], zoom);
 /* https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}   */
 /* https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x} */
-L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}  ', {
+L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}', {
     attribution: 'Tiles &copy; Esri — Source: USGS, Esri',
 }).addTo(map_);
 

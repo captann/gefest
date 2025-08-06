@@ -211,109 +211,111 @@
 </div>
 <div id="main-container">
     <div class="container">
-        <h2 id="upload-section">Загрузка заявок</h2>
-        <div id="warninfo" class="warn-banner">
-            <span class="icon">⚠️</span> Загрузка задач прервана: требуется подтверждение или уточнение некоторых адресов
-        </div>
+        {% if user_role_weight > 1 %}
+                <h2 id="upload-section">Загрузка заявок</h2>
+                <div id="warninfo" class="warn-banner">
+                    <span class="icon">⚠️</span> Загрузка задач прервана: требуется подтверждение или уточнение некоторых адресов
+                </div>
 
 
 
-    <form id="uploadForm" enctype="multipart/form-data">
-        <div class="mode-switcher">
-            <input type="radio" id="file-mode" name="mode" class="mode-radio" checked>
-            <label for="file-mode" class="mode-label">Из файла</label>
-            <input type="radio" id="link-mode" name="mode" class="mode-radio">
-            <label for="link-mode" class="mode-label">Из ссылки</label>
-        </div>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="mode-switcher">
+                    <input type="radio" id="file-mode" name="mode" class="mode-radio" checked>
+                    <label for="file-mode" class="mode-label">Из файла</label>
+                    <input type="radio" id="link-mode" name="mode" class="mode-radio">
+                    <label for="link-mode" class="mode-label">Из ссылки</label>
+                </div>
 
-        <label for="sheetName">Название листа:</label>
-        <input type="text" name="sheetName" id="sheetName" required>
-        <div id="headerMappingSection" style="margin-top: 20px;">
-      <h3>Настройка столбцов таблицы</h3>
-      <div class="header-mapping-group">
-        <label>ID задачи:</label>
-        <select name="col_task_id" required></select>
-      </div>
-      <div class="header-mapping-group">
-        <label>Дата:</label>
-        <select name="col_date" required></select>
-      </div>
-      <div class="header-mapping-group">
-        <label>Адрес:</label>
-        <select name="col_address" required></select>
-      </div>
-      <div class="header-mapping-group">
-        <label>Проблема:</label>
-        <select name="col_problem" required></select>
-      </div>
-      <div class="header-mapping-group">
-        <label>Решение:</label>
-        <select name="col_solution" required></select>
-      </div>
-      <div class="header-mapping-group">
-        <label>Подписан ли бланк:</label>
-        <select name="col_signed" required></select>
-      </div>
-      <div class="header-mapping-group">
-        <label>Значение подписанного бланка:</label>
-        <input type="text" name="signed_value" placeholder="например: Да" required value="Да">
-      </div>
-    </div>
-
-
-        <!-- 📁 Блок для файла -->
-        <div id="fileUploadSection">
-            <label for="excelFile">Выберите .xlsx файл (макс. 10 МБ):</label>
-            <input type="file" name="excelFile" id="excelFile" accept=".xlsx" required>
-        </div>
-
-        <!-- 🔗 Блок для ссылки (изначально скрыт) -->
-        <div id="linkUploadSection" style="display: none;">
-            <label for="sheetLink">Ссылка на Google-таблицу:</label>
-            <input type="text" name="spreadsheetLink" id="sheetLink" placeholder="https://docs.google.com/spreadsheets/..." value="https://docs.google.com/spreadsheets/d/1i6XreBzCqaFlfUAAJ2DRBZO2HrxnPDzh3HDIpl6fWH8">
-            <p id="copyNote" style="color: #aaa; font-size: 0.9em; margin-top: 5px; cursor: pointer;" >
-        Добавьте аккаунт <b id="copyEmail" style="color: orange">id-472@gefest-466717.iam.gserviceaccount.com</b> в доступ к таблице
-    </p>
+                <label for="sheetName">Название листа:</label>
+                <input type="text" name="sheetName" id="sheetName" required>
+                <div id="headerMappingSection" style="margin-top: 20px;">
+              <h3>Настройка столбцов таблицы</h3>
+              <div class="header-mapping-group">
+                <label>ID задачи:</label>
+                <select name="col_task_id" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>Дата:</label>
+                <select name="col_date" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>Адрес:</label>
+                <select name="col_address" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>Проблема:</label>
+                <select name="col_problem" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>Решение:</label>
+                <select name="col_solution" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>Подписан ли бланк:</label>
+                <select name="col_signed" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>Значение подписанного бланка:</label>
+                <input type="text" name="signed_value" placeholder="например: Да" required value="Да">
+              </div>
+            </div>
 
 
-        </div>
+                <!-- 📁 Блок для файла -->
+                <div id="fileUploadSection">
+                    <label for="excelFile">Выберите .xlsx файл (макс. 10 МБ):</label>
+                    <input type="file" name="excelFile" id="excelFile" accept=".xlsx" required>
+                </div>
 
-        <button type="submit" id="uploadBtn">Загрузить</button>
-        <div id="uploadStatus"></div>
-    </form>
-    <div id="existingTasksTableSection" style="display: none; margin-top: 20px;">
-
-        <div  class="warn-banner" style="display: block;">
-            <span class="icon">⚠️</span>Требуется уточнение ранее загруженных задач
-        </div>
-
-
-
-        <input type="text" id="taskSearchInput" placeholder="Поиск по ID задачи..." style="margin-bottom: 10px; width: 100%; padding: 5px;">
-
-        <form id="existingTasksForm">
-                    <button type="submit" style="margin-top: 15px;">Применить</button>
-
-            <table class="styled-table">
-                <thead>
-                    <tr>
-                        <th>ID задачи</th>
-                        <th>
-                            <label><input type="checkbox" id="checkAllBlank" checked> Выполнена</label>
-                        </th>
-                        <th>
-                            <label><input type="checkbox" id="checkAllArchive" checked> В архиве</label>
-                        </th>
-                    </tr>
-                </thead>
-                <tbody id="existingTasksTableBody"></tbody>
-            </table>
-
-        </form>
-    </div>
+                <!-- 🔗 Блок для ссылки (изначально скрыт) -->
+                <div id="linkUploadSection" style="display: none;">
+                    <label for="sheetLink">Ссылка на Google-таблицу:</label>
+                    <input type="text" name="spreadsheetLink" id="sheetLink" placeholder="https://docs.google.com/spreadsheets/..." value="https://docs.google.com/spreadsheets/d/1i6XreBzCqaFlfUAAJ2DRBZO2HrxnPDzh3HDIpl6fWH8">
+                    <p id="copyNote" style="color: #aaa; font-size: 0.9em; margin-top: 5px; cursor: pointer;" >
+                Добавьте аккаунт <b id="copyEmail" style="color: orange">id-472@gefest-466717.iam.gserviceaccount.com</b> в доступ к таблице
+            </p>
 
 
-    <div id="addressFixContainer"></div>
+                </div>
+
+                <button type="submit" id="uploadBtn">Загрузить</button>
+                <div id="uploadStatus"></div>
+            </form>
+            <div id="existingTasksTableSection" style="display: none; margin-top: 20px;">
+
+                <div  class="warn-banner" style="display: block;">
+                    <span class="icon">⚠️</span>Требуется уточнение ранее загруженных задач
+                </div>
+
+
+
+                <input type="text" id="taskSearchInput" placeholder="Поиск по ID задачи..." style="margin-bottom: 10px; width: 100%; padding: 5px;">
+
+                <form id="existingTasksForm">
+                            <button type="submit" style="margin-top: 15px;">Применить</button>
+
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>ID задачи</th>
+                                <th>
+                                    <label><input type="checkbox" id="checkAllBlank" checked> Выполнена</label>
+                                </th>
+                                <th>
+                                    <label><input type="checkbox" id="checkAllArchive" checked> В архиве</label>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="existingTasksTableBody"></tbody>
+                    </table>
+
+                </form>
+            </div>
+
+
+            <div id="addressFixContainer"></div>
+        {% endif %}
             <h2 id="sync">Синхронизация</h2>
 
     <div id="sync-section" style="margin-top: 40px;">
@@ -350,6 +352,7 @@
         <button id="syncButton" onclick="startSync()">Синхронизировать</button>
         <span id="syncStatus" style="margin-left: 10px;"></span>
     </div>
+        {% if user_role_weight > 1 %}
 
         <h2 id="roles-section">Роли</h2>
         <table>
@@ -361,20 +364,37 @@
             </thead>
             <tbody>
                 {% for user_id, user_data in users.items() %}
-                {% set username = user_data['login'] %}
-                {% set role = user_data['role'] %}
-                <tr>
-                    <td>{{ username }}</td>
-                    <td>
-                        <select name="role_{{ user_id }}" data-user-id="{{ user_id }}" data-original-role="{{ role }}" onchange="handleRoleChange(this)">
-                            <option value="user" {% if role == 'user' %}selected{% endif %}>user</option>
-                            <option value="admin" {% if role == 'admin' %}selected{% endif %}>admin</option>
-                        </select>
-                    </td>
-                </tr>
+                    {% set username = user_data['login'] %}
+                    {% set target_role = user_data['role'] %}
+                    <tr>
+                        <td>{{ username }}</td>
+                        <td>
+                            {% if role_weights[current_user_role] > role_weights[target_role] %}
+                                <select name="role_{{ user_id }}"
+                                        data-user-id="{{ user_id }}"
+                                        data-original-role="{{ target_role }}"
+                                        onchange="handleRoleChange(this)">
+                                    {% for available_role, weight in role_weights.items() %}
+                                        {% if weight <= role_weights[current_user_role] %}
+                                            <option value="{{ available_role }}"
+                                                    {% if available_role == target_role %}selected{% endif %}>
+                                                {{ available_role }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                            {% else %}
+                                <p>{{ target_role }}</p>
+                            {% endif %}
+                        </td>
+                    </tr>
                 {% endfor %}
             </tbody>
+
+
         </table>
+        {% endif %}
+
         <h2 style="margin-top: 30px;"id="addresses-section">Адреса</h2>
 
     <input type="text" id="addressSearch" placeholder="Поиск ..." >
@@ -389,12 +409,16 @@
                 <option value="address">По адресу</option>
             </select>
         </div>
-        <div style="margin-top: 10px;">
-            <label style="cursor: pointer;">
-                <input type="checkbox" id="autoArchiveToggle" {% if settings and settings.auto_archive_done_tasks %}checked{% endif %}>
-                Автоматически архивировать выполненные задачи
-            </label>
-        </div>
+        {% if user_role_weight > 1 %}
+
+            <div style="margin-top: 10px;">
+                <label style="cursor: pointer;">
+                    <input type="checkbox" id="autoArchiveToggle" {% if settings and settings.auto_archive_done_tasks %}checked{% endif %}>
+                    Автоматически архивировать выполненные задачи
+                </label>
+            </div>
+        {% endif %}
+
 
 
 
@@ -420,14 +444,20 @@
                         <tr>
                             <th onclick="sortTasks('tasksDone', 'task_id')">Номер</th>
                             <th onclick="sortTasks('tasksDone', 'address')">Адрес</th>
-                            <th onclick="sortTasks('tasksDone', 'date')">Дата</th><th>
-                            <input type="checkbox"
-           id="archiveAllCheckbox"
-           onchange="toggleAllArchives(this)"
-           {% if main_state %}checked{% endif %}>
-                    В архиве
+                            <th onclick="sortTasks('tasksDone', 'date')">Дата</th>
+                            {% if user_role_weight > 1 %}
 
-                </th>
+                                <th>
+
+                                                <input type="checkbox"
+                               id="archiveAllCheckbox"
+                               onchange="toggleAllArchives(this)"
+                               {% if main_state %}checked{% endif %}>
+                                        В архиве
+
+                                </th>
+                            {% endif %}
+
 
                         </tr>
                     </thead>
@@ -440,9 +470,14 @@
         🏠
     </a>
     <div class="floating-nav">
+        {% if user_role_weight > 1 %}
         <a href="#upload-section"><span class="icon">📥</span><span class="label">Загрузка</span></a>
+        {% endif %}
+
         <a href="#sync"><span class="icon">🔄</span><span class="label">Синхронизация</span></a>
+        {% if user_role_weight > 1 %}
         <a href="#roles-section"><span class="icon">👥</span><span class="label">Роли</span></a>
+        {% endif %}
         <a href="#addresses-section"><span class="icon">🏠</span><span class="label">Адреса</span></a>
         <a href="#tasks-section"><span class="icon">✅</span><span class="label">Задачи</span></a>
 
@@ -456,16 +491,21 @@ const users = {{ users | tojson }};
 const tasks_not = {{ tasks_not | tojson }};
 const tasks_done = {{ tasks_done | tojson }};
 const allAddresses = {{ addresses | tojson }};
+const user_role_weight = {{ user_role_weight }};
 </script>
 <script src="{{ url_for('static', filename='js/admin_loading.js') }}"></script>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+{% if user_role_weight > 1 %}
 <script src="{{ url_for('static', filename='js/admin_select_headers.js') }}"></script>
+{% endif %}
 <script src="{{ url_for('static', filename='js/admin_address.js') }}"></script>
 <script src="{{ url_for('static', filename='js/update_address.js') }}"></script>
+{% if user_role_weight > 1 %}
 <script src="{{ url_for('static', filename='js/admin_switcher.js') }}"></script>
+{% endif %}
 <script src="{{ url_for('static', filename='js/admin_copy_email.js') }}"></script>
 <script src="{{ url_for('static', filename='js/admin_archieve_worker.js') }}"></script>
 <script src="{{ url_for('static', filename='js/admin_update_settings.js') }}"></script>

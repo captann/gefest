@@ -32,7 +32,7 @@ function renderTasks(tableId, tasks) {
         let archiveCell = '';
 
         // Добавляем чекбокс "в архиве", только для таблицы сделанных задач
-        if (tableId === 'tasksDoneBody') {
+        if ( (tableId === 'tasksDoneBody') && (user_role_weight > 1) ) {
             const isChecked = task.archieved ? 'checked' : '';
             archiveCell = `<td>
             <input type="checkbox"
@@ -125,10 +125,13 @@ document.getElementById('searchType').addEventListener('change', filterTasks);
 
 document.addEventListener('DOMContentLoaded', () => {
     filterTasks();
+    if (user_role_weight > 1) {
     populateHeaderSelectors();
     applyDefaultColumnMapping(defaultColumnsFile);
+    }
 
 });
+if (user_role_weight > 1) {
 document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     const fileMode = document.getElementById('file-mode').checked;
     const linkInput = document.getElementById('sheetLink'); // добавьте id="sheetLink" в поле ввода ссылки
@@ -283,7 +286,7 @@ if (fixTotal > 0 || confirmTotal > 0) {
         fileInput.value = '';
 
 });
-
+}
 function setTaskArchived(checkbox) {
     const taskId = parseInt(checkbox.dataset.taskId);
     const isChecked = checkbox.checked;

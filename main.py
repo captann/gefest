@@ -5,6 +5,9 @@ import hashlib
 import openpyxl
 from flask import Flask, request, jsonify, render_template, json, redirect, url_for, abort, send_file
 import os
+from werkzeug.security import generate_password_hash
+from werkzeug.security import check_password_hash
+from role_settings import *
 import secrets
 from models import *
 from flask import send_from_directory
@@ -91,7 +94,7 @@ app = Flask(__name__)
 app.secret_key = APP_SECRET_KEY
 UPLOAD_FOLDER = 'uploads'  # папка, куда сохраняем Excel
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config["TEMPLATES_AUTO_RELOAD"] = False  # Автоматическая перезагрузка шаблонов
+app.config["TEMPLATES_AUTO_RELOAD"] = True  # Автоматическая перезагрузка шаблонов
 
 
 
@@ -401,7 +404,7 @@ def index():
             "main.html",
             initial_statuses=statuses,
             houses_colors=houses_colors,
-
+            role_icons=role_icons,
             polygonsData=polygonsData,
             role=role,
             points=house_points,
@@ -438,7 +441,7 @@ def login():
             user = dbsession.query(UserModel).filter_by(login=login).first()
             user_data = (user.user_id, user.password) if user else None
 
-        if user_data and user_data[1] == password:
+        if user_data and check_password_hash(user_data[1], password):
             session['user_id'] = user_data[0]
             redirect_url = next_page if next_page and is_safe_url(next_page) else url_for('index')
             resp = make_response(redirect(redirect_url))
@@ -583,7 +586,7 @@ def register():
                 if existing_user:
                     error = "Пользователь с таким логином уже существует"
                 else:
-                    new_user = UserModel(login=login, password=password, role='user')
+                    new_user = UserModel(login=login, password=generate_password_hash(password), role='user')
                     dbsession.add(new_user)
                     dbsession.commit()
                     dbsession.refresh(new_user)
@@ -629,13 +632,11 @@ def generate_report():
 
     return rendered_html
 
-@app.route('/admin')
+@app.route('/control_panel')
 @login_required
-def new_table():
+def control_panel():
     current_user = User.get_by_id(session['user_id'])
-    if current_user.role != "admin":
-        return redirect('/')
-
+    current_user_role = current_user.role
     tasks = Task.get_tasks()
 
     with DBsession() as dbsession:
@@ -658,7 +659,7 @@ def new_table():
         user.user_id: {"login": user.login, "role": user.role}
         for user in users
     }
-
+    user_role_weight = role_weights.get(current_user.role, 0)
 
     return render_template(
         'admin.html',
@@ -666,7 +667,10 @@ def new_table():
         tasks_not=tasks_not,
         users=users_d,
         main_state=main_state,
+        current_user_role=current_user_role,
         addresses=data,
+        role_weights=role_weights,
+        user_role_weight=user_role_weight,
         settings=settings  # 👈 вот это ключевое!
     )
 
@@ -691,10 +695,10 @@ def update_role():
 
         if new_role not in ["user", "admin"]:
             return jsonify(success=False, message="Недопустимая роль")
-
         with DBsession() as dbsession:
             user = dbsession.query(UserModel).filter_by(user_id=user_id).first()
             if user:
+
                 user.role = new_role
                 dbsession.commit()
         if not user:
@@ -993,8 +997,11 @@ def update_existing_tasks():
 @app.route('/download_db')
 @login_required
 def download_db():
-    uid = session.get(['user_id'], 0)
-    if uid != 1:
+    uid = session.get('user_id', 0)
+    if uid == 0:
+
+        return redirect('/')
+    if role_weights[User.get_by_id(uid).role] <= 2:
         return redirect('/')
     db_path = os.path.abspath(DB_FILE)  # получаем абсолютный путь
 
@@ -1011,6 +1018,7 @@ def about():
 
 if __name__ == '__main__':
     import os
+    print(generate_password_hash('lksdnflsnlkndsndsnfsdlknjfdslknfdsa'))
     app.run(host='0.0.0.0', port=8080)
 
 

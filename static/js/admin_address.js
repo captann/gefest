@@ -147,8 +147,9 @@ title.appendChild(link);
             attributionControl: false,
             zoomControl: true
         }).setView([55.75, 37.61], 10); // дефолтный центр
-
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        /* https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}*/
+        /* https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png */
+        L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(miniMap);
 
@@ -232,16 +233,17 @@ title.appendChild(link);
     }, 0);
 
 
+    if (user_role_weight > 1) {
+        const submitBtn = document.createElement('button');
+        submitBtn.textContent = "Применить";
+        submitBtn.type="button";
+        submitBtn.style.marginTop = '10px';
 
-    const submitBtn = document.createElement('button');
-    submitBtn.textContent = "Применить";
-    submitBtn.type="button";
-    submitBtn.style.marginTop = '10px';
-
-    submitBtn.addEventListener('click', () => {
-        sendAddressUpdate(inputRefs, div, isFullForm, isFromMainList, isFullForm);
-    });
-    div.appendChild(submitBtn);
+        submitBtn.addEventListener('click', () => {
+            sendAddressUpdate(inputRefs, div, isFullForm, isFromMainList, isFullForm);
+        });
+        div.appendChild(submitBtn);
+    }
 
 
     return div;
