@@ -6,8 +6,9 @@ window.map_ = L.map('map_', {
     attributionControl: false,
     zoomControl: window.innerWidth >= 1000
 }).setView([centerLat, centerLon], zoom);
-
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+/* https://core-renderer-tiles.maps.yandex.net/tiles?l=map&x={x}&y={y}&z={z}   */
+/* https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x} */
+L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}  ', {
     attribution: 'Tiles &copy; Esri — Source: USGS, Esri',
 }).addTo(map_);
 
