@@ -579,6 +579,8 @@ def register():
             error = "Пожалуйста, заполните все поля"
         elif password != confirm_password:
             error = "Пароли не совпадают"
+        elif len(login) > 6:
+            error = "Максимальная длина логина - 6 символов"
         else:
             with DBsession() as dbsession:
                 existing_user = dbsession.query(UserModel).filter_by(login=login).first()
