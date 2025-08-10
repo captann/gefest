@@ -445,18 +445,20 @@
                             <th onclick="sortTasks('tasksDone', 'task_id')">Номер</th>
                             <th onclick="sortTasks('tasksDone', 'address')">Адрес</th>
                             <th onclick="sortTasks('tasksDone', 'date')">Дата</th>
+                            <th>
                             {% if user_role_weight > 1 %}
 
-                                <th>
+
 
                                                 <input type="checkbox"
                                id="archiveAllCheckbox"
                                onchange="toggleAllArchives(this)"
                                {% if main_state %}checked{% endif %}>
+                                    {% endif %}
                                         В архиве
 
                                 </th>
-                            {% endif %}
+
 
 
                         </tr>

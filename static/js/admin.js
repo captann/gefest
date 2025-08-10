@@ -41,8 +41,11 @@ function renderTasks(tableId, tasks) {
                    ${isChecked}
                    onchange="onArchiveCheckboxChanged(this)">
         </td>`;
-
-
+        }
+        else if (tableId === 'tasksDoneBody')
+        {
+            const isChecked = task.archieved ? 'Да' : 'Нет';
+            archiveCell = `<td><p>${isChecked}</p></td>`;
         }
 
         row.innerHTML = `
