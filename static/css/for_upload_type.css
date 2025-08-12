@@ -1,0 +1,31 @@
+/* Заголовок + селект в одну строку */
+#upload-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: nowrap;            /* не переносить */
+}
+
+/* Переопределяем глобальное width:100% для селекта в заголовке */
+#upload-section select {
+  width: auto !important;       /* не занимай всю ширину */
+  min-width: 160px;             /* чтобы выглядел аккуратно */
+  padding: 4px 8px;
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* Опционально: на очень узких экранах разрешим перенос */
+@media (max-width: 520px) {
+  #upload-section {
+    flex-wrap: wrap;
+  }
+  #upload-section select {
+    width: 100% !important;
+  }
+}

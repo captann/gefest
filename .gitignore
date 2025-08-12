@@ -41,3 +41,4 @@ build/
 migrations/
 gefest-key.json
 key_code.txt
+address_new.db

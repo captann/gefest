@@ -410,7 +410,7 @@ class InvalidAddressError(Exception):
     pass
 
 class Task:
-    def __init__(self, task_id, date, address: Address, problem, solution, blank=False, archieved=False):
+    def __init__(self, task_id, date, address: Address, problem, solution, blank=False, archieved=False, ppr=False):
         if not address.is_valid:
             raise InvalidAddressError("Invalid address")
         self.archieved = archieved
@@ -420,6 +420,7 @@ class Task:
         self.correct_location(address)
         self.get_lon_lan()
         self.problem = problem
+        self.ppr = ppr
         self.solution = solution
         self._save_task_to_db()
 
@@ -450,6 +451,17 @@ class Task:
             try:
                 existing_task = session.query(TaskModel).filter_by(task_id=self.task_id).first()
                 self.already_exist = bool(existing_task)
+
+                record = session.query(TaskModel).filter(
+                    TaskModel.task_id == self.task_id,
+                    TaskModel.is_ppr == 0
+                ).first()
+                # если не ппр, т.е. более высокий приоритет
+                if record:
+                    self.already_exist = False
+                    record.task_id = generate_ppr_id(self.home_id)
+                    session.commit()
+
                 if not self.already_exist:
                     new_task = TaskModel(
                         task_id=self.task_id,
@@ -458,7 +470,8 @@ class Task:
                         problem=self.problem,
                         solution=self.solution,
                         blank=self.blank,
-                        archieved=self.archieved  # ← добавлено
+                        archieved=self.archieved,  # ← добавлено
+                        is_ppr=self.ppr
                     )
                     session.add(new_task)
                     session.commit()
@@ -608,6 +621,93 @@ def column_letter_to_index(col_letter: str) -> int:
             raise ValueError(f"Недопустимый символ в названии столбца: {c}")
     return result - 1  # Приводим к 0-based
 
+def read_ppr_google_sheet_data(**kwargs) -> dict:
+    """
+    Считывает выбранные столбцы из Google Sheets.
+    Аргументы через kwargs:
+        - sheet_url: ссылка на таблицу
+        - sheet_name: имя листа
+        - creds_path: путь к JSON (по умолчанию 'credentials.json')
+        - start_row: с какой строки читать (по умолчанию 2)
+        - task_id, date, raw_location, problem, solution, blank: буквенные имена столбцов (например, "A", "C", "E")
+    """
+
+    # Настройки по умолчанию
+    creds_path = kwargs.get("creds_path", "credentials.json")
+    sheet_url = kwargs.get("sheet_url")
+    sheet_name = kwargs.get("sheet_name")
+    start_row = kwargs.get("start_row", 2)
+
+    # Проверка обязательных параметров
+    if not sheet_url or not sheet_name:
+        return {"success": False, "message": "Отсутствует sheet_url или sheet_name"}
+
+    # Обработка словаря столбцов
+    columns_to_read = {
+        "ppr_short_name": kwargs.get("ppr_short_name"),
+        "ppr_address": kwargs.get("ppr_address"),
+        "ppr_ID1": kwargs.get("ppr_ID1"),
+        "ppr_ID2": kwargs.get("ppr_ID2")
+    }
+
+    if not all(columns_to_read.values()):
+        return {
+            "success": False,
+            "message": "Некорректно указаны столбцы: все поля (task_id, date и т.д.) должны быть заданы"
+        }
+    # Конвертация букв в индексы
+    try:
+        col_indices = {
+            key: column_letter_to_index(val)
+            for key, val in columns_to_read.items()
+        }
+    except Exception as e:
+        return {"success": False, "message": f"Ошибка при обработке буквенных названий столбцов: {e}"}
+
+    # Авторизация
+    try:
+        scope = [
+            "https://spreadsheets.google.com/feeds",
+            "https://www.googleapis.com/auth/drive"
+        ]
+        creds = ServiceAccountCredentials.from_json_keyfile_name(creds_path, scope)
+        client = gspread.authorize(creds)
+    except Exception as e:
+        return {"success": False, "message": f"Ошибка авторизации: {e}"}
+
+    # Открытие листа
+    try:
+        sheet = client.open_by_url(sheet_url).worksheet(sheet_name)
+    except gspread.exceptions.WorksheetNotFound as e:
+        return {"success": False, "message": f"Лист '{sheet_name}' не найден: {e}"}
+    except Exception as e:
+        return {"success": False, "message": f"Ошибка открытия таблицы: {e}"}
+
+    # Получение всех данных
+    try:
+        all_data = sheet.get_all_values()
+    except Exception as e:
+        return {"success": False, "message": f"Ошибка получения данных с листа: {e}"}
+
+    if len(all_data) < start_row:
+        return {"success": False, "message": "Недостаточно строк на листе"}
+
+    # Сбор нужных данных
+    selected_data = []
+    try:
+        for row in all_data[start_row - 1:]:  # -1 т.к. индексация с 0
+            if all(cell == "" for cell in row):
+                break
+            row_data = {
+                key: row[col_indices[key]] if col_indices[key] < len(row) else ""
+                for key in col_indices
+            }
+            selected_data.append(row_data)
+    except Exception as e:
+        return {"success": False, "message": f"Ошибка обработки данных: {e}"}
+
+    return {"success": True, "data": selected_data}
+
 def read_google_sheet_data(**kwargs) -> dict:
     """
     Считывает выбранные столбцы из Google Sheets.
@@ -697,8 +797,29 @@ def read_google_sheet_data(**kwargs) -> dict:
 
     return {"success": True, "data": selected_data}
 
+import random
 
+def generate_ppr_id(home_id):
+    new_id = None
+    with Session() as dbsession:
+        ids = [row[0] for row in dbsession.query(TaskModel.task_id).filter(
+            TaskModel.home_id.in_([home_id]),
+            TaskModel.is_ppr == 1
+        ).all()]
 
+        # Получаем все существующие task_id (в виде множества для быстрого поиска)
+        existing_ids = set(
+            dbsession.query(TaskModel.task_id).all()
+        )
+        existing_ids = {row[0] for row in existing_ids}  # преобразуем в set int
+    if ids:
+        print('exist')
+        return ids[0]
+    # Генерация уникального id
+    while True:
+        new_id = random.randint(1, 10**12)  # или свой диапазон
+        if new_id not in existing_ids:
+            return new_id
 
 def main(**kwargs):
     incorrect_addresses = []
@@ -879,6 +1000,77 @@ def main(**kwargs):
                     "submit_required": submit_required,
             "already_existing": already_existing}
 
+
+def make_ppr(**kwargs):
+    incorrect_addresses = []
+    submit_required = []
+    already_existing = []
+    result = read_ppr_google_sheet_data(
+        sheet_url=kwargs.get("from_link", ""),
+        sheet_name=kwargs.get('sheet', False),
+        ppr_short_name=kwargs.get('ppr_short_name', False),
+        ppr_address=kwargs.get('ppr_address', False),
+        ppr_ID1=kwargs.get('ppr_ID1', False),
+        ppr_ID2=kwargs.get('ppr_ID2', False),
+        creds_path=creds_path
+    )
+    if result["success"]:
+        print(result)
+        for i, row in enumerate(result['data'], start=1):
+            if all(str(cell).strip() == '' for cell in row.values()):
+                break
+            """if not row["task_id"]:
+                return {"success": False,
+                        "message": "нет возможности считать ID задачи",
+                        "incorrect_addresses": incorrect_addresses,
+                        "submit_required": submit_required,
+                        "already_existing": already_existing
+                        }"""
+            address = Address(
+                raw_address=row["ppr_ID1"] + " " + row["ppr_short_name"] + " " + row["ppr_address"]
+            )
+
+            if address.is_valid and not address.submit_required:
+                task = Task(task_id=generate_ppr_id(address.home_id),
+                            date="",
+                            address=address,
+                            problem=f"Требуется выполнить ППР. ИД1: {row['ppr_ID1']}." + int(bool(row['ppr_ID2'])) * '\n'f"ИД2: {row['ppr_ID2']}." ,
+                            solution='',
+                            blank=False,
+                            ppr=True
+                            )
+
+                if task.already_exist and task.blank:
+                    already_existing.append({
+                        "task_id": task.task_id,
+                        "blank": task.blank,
+                        "archieved": task.archieved
+                    })
+            elif not address.is_valid:
+                incorrect_addresses.append(row["raw_location"])
+            if address.submit_required and address.is_valid:
+                submit_required.append(address.__dict__())
+        if not incorrect_addresses and not submit_required:
+            return {"success": True,
+                    "message": "задачи загружены",
+                    "incorrect_addresses": incorrect_addresses,
+                    "submit_required": submit_required,
+                    "already_existing": already_existing}
+
+        return {"success": False,
+                "message": "есть нераспознанные адреса или адреса, требующие подтверждения",
+                "incorrect_addresses": incorrect_addresses,
+                "submit_required": submit_required,
+                "already_existing": already_existing}
+    else:
+        return {"success": False,
+                "message": result["message"],
+                "incorrect_addresses": incorrect_addresses,
+                "submit_required": submit_required,
+                "already_existing": already_existing
+                }
+
+
 if __name__ == "__main__":
     print(main(from_link="https://docs.google.com/spreadsheets/d/1i6XreBzCqaFlfUAAJ2DRBZO2HrxnPDzh3HDIpl6fWH8/",
                ))
@@ -889,4 +1081,3 @@ if __name__ == "__main__":
     #print(Address(home_id="zov"))
     #main(User("NN", "123"), from_exel=False)
     #main(User("NN2", "123"), from_exel=False)
-

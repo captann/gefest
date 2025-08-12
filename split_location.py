@@ -99,10 +99,15 @@ def parse(s):
             home_name += word + (", " if i in commas else " ")
         else:
             home_address += word + (", " if i in commas else " ")
+    if result_index:
+        try:
+            result_index = int(result_index)
+        except Exception:
+            result_index = 0
 
     return {
         "success": True,
-        "home_id": int(result_index),
+        "home_id": result_index,
         "home_name": home_name.strip(),
         "home_address": home_address.strip()
     }

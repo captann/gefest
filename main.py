@@ -19,7 +19,7 @@ from jinja2 import Template
 from sqlalchemy.sql.functions import current_user, func
 
 from app_config import *
-from tasks import main, Task
+from tasks import main, Task, make_ppr
 from werkzeug.utils import secure_filename
 import uuid
 #from db_migration_first import syncronyce_db
@@ -806,18 +806,26 @@ def from_link():
 
     if link == '':
         return jsonify(success=False, message="пустая ссылка")
-
-    result = main(from_link=link,
-                           sheet=sheet_name,
-                           task_id=request.form.get('col_task_id', 'A'),
-                           date=request.form.get('col_date', 'C'),
-                           raw_location=request.form.get('col_address', 'D'),
-                           problem=request.form.get('col_problem', 'E'),
-                           solution=request.form.get('col_solution', 'F'),
-                           blank=request.form.get('col_signed', 'H'),
-                            checked_value=request.form.get('signed_value', 'Да')
-
+    if request.form.get('type') == 'ppr':
+        result = make_ppr(from_link=link,
+                          sheet=sheet_name,
+                          ppr_ID1=request.form.get('ppr_ID1', 'E'),
+                          ppr_ID2=request.form.get('ppr_ID2', 'F'),
+                          ppr_short_name=request.form.get('ppr_short_name', 'C'),
+                          ppr_address=request.form.get('ppr_address', 'D')
         )
+    else:
+        result = main(from_link=link,
+                               sheet=sheet_name,
+                               task_id=request.form.get('col_task_id', 'A'),
+                               date=request.form.get('col_date', 'C'),
+                               raw_location=request.form.get('col_address', 'D'),
+                               problem=request.form.get('col_problem', 'E'),
+                               solution=request.form.get('col_solution', 'F'),
+                               blank=request.form.get('col_signed', 'H'),
+                                checked_value=request.form.get('signed_value', 'Да')
+
+            )
     return jsonify(result)
 
 @app.route('/favicon.ico')

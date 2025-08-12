@@ -27,10 +27,12 @@ class TaskModel(Base):
     problem = Column(Text, nullable=False)
     solution = Column(Text)
     blank = Column(Boolean, default=False)
-    archieved = Column(Boolean, default=False)  # 🆕 Добавлено
+    archieved = Column(Boolean, default=False)  # уже было
+    is_ppr = Column(Boolean, default=False)
 
     # Обратная связь: задача → адрес
     address = relationship("AddressModel", back_populates="tasks")
+
 
 
 class UserModel(Base):

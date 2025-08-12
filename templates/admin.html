@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mode_switcher.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/back.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/warn_banner.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/for_upload_type.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <style>
@@ -212,7 +213,15 @@
 <div id="main-container">
     <div class="container">
         {% if user_role_weight > 1 %}
-                <h2 id="upload-section">Загрузка заявок</h2>
+                <h2 id="upload-section">
+                    Загрузка
+                    <select id="taskType">
+                        <option value="zayavki">заявок</option>
+                        <option value="ppr">ППР</option>
+                    </select>
+                </h2>
+
+
                 <div id="warninfo" class="warn-banner">
                     <span class="icon">⚠️</span> Загрузка задач прервана: требуется подтверждение или уточнение некоторых адресов
                 </div>
@@ -259,6 +268,26 @@
                 <label>Значение подписанного бланка:</label>
                 <input type="text" name="signed_value" placeholder="например: Да" required value="Да">
               </div>
+            </div>
+                <div id="headerMappingSection_ppr" style="margin-top: 20px;display:none;">
+              <h3>Настройка столбцов таблицы</h3>
+              <div class="header-mapping-group" id="ppr_headerMappingSection">
+                <label>Краткое наименование:</label>
+                <select name="ppr_short_name" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>Адрес:</label>
+                <select name="ppr_address" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>ИД1:</label>
+                <select name="ppr_ID1" required></select>
+              </div>
+              <div class="header-mapping-group">
+                <label>ИД2:</label>
+                <select name="ppr_ID2" required></select>
+              </div>
+
             </div>
 
 
@@ -516,6 +545,7 @@ const user_role_weight = {{ user_role_weight }};
 <script src="{{ url_for('static', filename='js/admin_sync.js') }}"></script>
 <script src="{{ url_for('static', filename='js/already_exist.js') }}"></script>
 <script src="{{ url_for('static', filename='js/update_role.js') }}"></script>
+<script src="{{ url_for('static', filename='js/for_upload_type.js') }}"></script>
 <!--<script>hideLoading();</script> -->
 </body>
 </html>

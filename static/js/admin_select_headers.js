@@ -31,6 +31,13 @@ const defaultColumnsLink = {
     col_signed: 'H'
 };
 
+const defaultColumnsPPR = {
+    ppr_short_name: 'C',
+    ppr_address: 'D',
+    ppr_ID1: 'E',
+    ppr_ID2: 'F'
+};
+
 function applyDefaultColumnMapping(mapping) {
     Object.entries(mapping).forEach(([name, value]) => {
         const select = document.querySelector(`#headerMappingSection select[name="${name}"]`);
@@ -72,4 +79,42 @@ function applyDefaultColumnMapping2(mapping) {
 
 applyDefaultColumnMapping2(defaultColumnsLink);
 
+
+// Заполнить селекты A..Z внутри PПР-блока
+function populatePPRSelectors() {
+  const container =
+    document.querySelector('#headerMappingSection_ppr') ||
+    document.querySelector('#ppr_headerMappingSection'); // на случай, если id стоит на внутреннем div
+
+  if (!container) return;
+
+  const selects = container.querySelectorAll('select');
+  selects.forEach(select => {
+    select.innerHTML = '';
+    for (let i = 0; i < 26; i++) {
+      const letter = String.fromCharCode(65 + i); // A-Z
+      const opt = document.createElement('option');
+      opt.value = letter;
+      opt.textContent = letter;
+      select.appendChild(opt);
+    }
+  });
+}
+
+// Применить дефолтные значения из defaultColumnsPPR
+function applyDefaultColumnMappingPPR() {
+  if (typeof defaultColumnsPPR === 'undefined') return;
+  Object.entries(defaultColumnsPPR).forEach(([name, value]) => {
+    const sel =
+      document.querySelector(`#headerMappingSection_ppr select[name="${name}"]`) ||
+      document.querySelector(`#ppr_headerMappingSection select[name="${name}"]`);
+    if (sel) sel.value = value;
+  });
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', () => {
+  populatePPRSelectors();
+  applyDefaultColumnMappingPPR();
+});
 

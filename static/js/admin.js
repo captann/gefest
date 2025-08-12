@@ -178,9 +178,19 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     formData.append('file', fileInput.files[0]);
     formData.append('sheet', sheetInput.value);
     formData.append('link', linkInput.value.trim());
-    document.querySelectorAll('#headerMappingSection select, #headerMappingSection input').forEach(input => {
-    formData.append(input.name, input.value);
-});
+    const modeSelect = document.getElementById('taskType'); // id вашего select-а "Заявки / ППР"
+    formData.append('type', modeSelect.value);
+    if (modeSelect && modeSelect.value === 'ppr') {
+        // Если ППР — собираем из ppr_headerMappingSection
+        document.querySelectorAll('#ppr_headerMappingSection select, #ppr_headerMappingSection input').forEach(input => {
+            formData.append(input.name, input.value);
+        });
+    } else {
+        // Иначе — из headerMappingSection
+        document.querySelectorAll('#headerMappingSection select, #headerMappingSection input').forEach(input => {
+            formData.append(input.name, input.value);
+        });
+    }
     formData.append('signed_value', formData.get('signed_value'))
 
     if (true) {
@@ -193,7 +203,6 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
         container.innerHTML = '';
 
     const result = await response.json();
-    renderAlreadyExistingTasksTable(result.already_existing);
             document.getElementById('sheetName').value = "";
         if (result.success) {
     status.innerHTML = `<span style="color: #00e676;">&#10004;</span> Задачи загружены`;
@@ -241,7 +250,6 @@ if (result.incorrect_addresses && result.incorrect_addresses.length > 0) {
         const form = createAddressForm(str, {}, false, false);
         container.appendChild(form);
     });
-    console.log(container);
 }
 
 if (result.submit_required && result.submit_required.length > 0) {
@@ -272,6 +280,7 @@ if (hasFixes) {
 const warn = document.getElementById('warninfo');
 if (fixTotal > 0 || confirmTotal > 0) {
     warn.style.display = 'block';
+
     document.getElementById('uploadForm').style.display = 'none';
 }
 }
