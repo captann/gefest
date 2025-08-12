@@ -545,7 +545,10 @@ const user_role_weight = {{ user_role_weight }};
 <script src="{{ url_for('static', filename='js/admin_sync.js') }}"></script>
 <script src="{{ url_for('static', filename='js/already_exist.js') }}"></script>
 <script src="{{ url_for('static', filename='js/update_role.js') }}"></script>
+{% if user_role_weight > 1 %}
 <script src="{{ url_for('static', filename='js/for_upload_type.js') }}"></script>
+{% endif %}
+
 <!--<script>hideLoading();</script> -->
 </body>
 </html>
