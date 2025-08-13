@@ -28,8 +28,7 @@
 }
 
 .search-container input:focus,
-.area-search:focus,
-.search-select:focus {
+.area-search:focus {
     border-color: #00bfa6;
 }
 

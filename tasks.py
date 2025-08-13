@@ -478,6 +478,7 @@ class Task:
                 else:
                     self.archieved = existing_task.archieved
                     self.blank = existing_task.blank
+                    self.ppr = existing_task.is_ppr
             except Exception as e:
                 session.rollback()
                 print(f"Ошибка при сохранении задачи {self.task_id}: {str(e)}")
@@ -521,7 +522,7 @@ class Task:
 
 
     @staticmethod
-    def get_tasks(archieved=False):
+    def get_tasks(archieved=False, task_type=0):
         res = []
         with Session() as session:
             all_tasks = session.query(TaskModel).all()
@@ -546,11 +547,26 @@ class Task:
                     blank=t.blank,
                     archieved=t.archieved  # ← добавлено
                 )
-                if archieved:
-                    if not task.archieved:
+
+                if task_type == 0:
+                    if archieved:
+                        if not task.archieved:
+                            res.append(task)
+                    else:
                         res.append(task)
-                else:
-                    res.append(task)
+                elif task_type == 1 and not task.ppr:
+                    if archieved:
+                        if not task.archieved:
+                            res.append(task)
+                    else:
+                        res.append(task)
+                elif task_type == 2 and task.ppr:
+                    if archieved:
+                        if not task.archieved:
+                            res.append(task)
+                    else:
+                        res.append(task)
+
         return res
 
     def __dict__(self):

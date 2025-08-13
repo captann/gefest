@@ -18,6 +18,8 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/areas_action_buttons.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_adaptation.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mobile_button.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/for_upload_type.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/task_title.css') }}">
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
@@ -82,7 +84,14 @@
 
             </div>
 
-                <h4  class="panel-title" id="task-title">Список объектов</h4>
+                <!--<h4  class="panel-title" id="task-title">Список объектов</h4>-->
+                <div id="task-title" class="search-select-group" style="">
+                    <select id="map-change-section" class=" search-select-group search-select"  {% if task_type == 1 or task_type == 2%} style="box-shadow: rgb(255, 126, 0) 0px 0px 8px 2px;border-radius: 5px;"{% endif %}>
+                        <option value="/" {% if task_type == 0 %}selected{% endif %} >Список задач</option>
+                        <option value="/tasks" {% if task_type == 1 %}selected {% endif %}>Список заявок</option>
+                        <option value="/ppr" {% if task_type == 2 %}selected{% endif %}>Список ППР</option>
+                    </select>
+                </div>
                 <div id="scroll-progress-bar" style="display:none;">
                     <div id="scroll-progress-fill"></div>
                 </div>
@@ -173,6 +182,7 @@
     <script src="{{ url_for('static', filename='js/adaptation_to_mobile.js') }}"></script>
     <script src="{{ url_for('static', filename='js/polygons.js') }}"></script>
     <script src="{{ url_for('static', filename='js/generate_report.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/change_map_type.js') }}"></script>
 
 
 

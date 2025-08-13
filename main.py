@@ -328,25 +328,29 @@ def add_area(hash):
         name_exist = Polygon.check_name(name, current_user.user_id)
         return render_template('add_area.html', name_exist=name_exist, name=name)
 
-
 @app.route('/')
+@app.route('/tasks')
+@app.route('/ppr')
 @login_required
 def index():
     current_user = User.get_by_id(session['user_id'])
     if True:
-        with DBsession() as dbsession:
-            tasks = dbsession.query(TaskModel.task_id, TaskModel.blank, TaskModel.home_id).filter_by(archieved=0).all()
+        task_types = {"/": 0,
+                      "/tasks": 1,
+                      "/ppr": 2}
 
-        statuses = {str(task_id): bool(blank) for task_id, blank, _ in tasks}
-        home_ids = [(home_id,) for _, _, home_id in tasks]  # имитируем fetchall()
+        task_type = task_types[request.path]
+        ok_color = 'green'
 
+        tasks = Task.get_tasks(archieved=True, task_type=task_type)
+        from tasks import is_point_in_area
+        tasks_f = [task.__dict__() for task in tasks if is_point_in_area(task.lon_lan, current_user.get_checked_polygons_ids())]
+        statuses = {str(task['task_id']): bool(task['blank']) for task in tasks_f}
+        home_ids = [(task['home_id'],) for task in tasks_f]  # имитируем fetchall()
         houses_colors = {}
         poligons = current_user.get_polygons()
-
         polygonsData = {}
-
         for polygon in poligons:
-
             polygonsData[polygon.polygon_id] = {
                 "points": [list(i) for i in polygon.points],
                 "color": polygon.color,
@@ -356,7 +360,7 @@ def index():
             }
         for i in home_ids:
             i = i[0]
-            color = 'green' if get_home_status(i)[0] else 'red'
+            color = ok_color if get_home_status(i)[0] else 'red'
             houses_colors[i] = color
         role = current_user.role
         house_points = []
@@ -372,19 +376,12 @@ def index():
                     result.lon,
                     result.lat
                 ])
-        tasks = Task.get_tasks(archieved=True)
-        from tasks import is_point_in_area
-        tasks_f = [task for task in tasks if is_point_in_area(task.lon_lan, current_user.get_checked_polygons_ids())]
+
         home_dict = {}
         test_mode = {}
-        shapka = ["home_id", "home_name", "home_address", "lon", "lat"]
-
         with DBsession() as dbsession:
-            for task in tasks_f:
-                info = task.__dict__()
-
+            for info in tasks_f:
                 home_id = info['home_id']
-
                 if home_id not in home_dict:
                     addr = dbsession.query(AddressModel).filter_by(home_id=home_id).first()
                     if addr:
@@ -400,6 +397,7 @@ def index():
                     test_mode[home_id] = [info]
                 else:
                     test_mode[home_id].append(info)
+
         return render_template(
             "main.html",
             initial_statuses=statuses,
@@ -411,13 +409,15 @@ def index():
             login=current_user.login,
             user={"user_id": current_user.user_id, "login": current_user.login, "role": current_user.role},
             homes=home_dict,
-            tasks=test_mode
+            tasks=test_mode,
+            task_type=task_type
         )
     else:
         pass
+
     """except Exception as e:
-        return f"Ошибка загрузки: {str(e)}", 500
-"""
+        return f"Ошибка загрузки: {str(e)}", 500"""
+
 
 from urllib.parse import urlparse, urljoin
 
@@ -466,6 +466,7 @@ def logout():
 @app.route('/update_task_status', methods=['POST'])
 @login_required
 def update_task_status():
+    ok_color = 'green'
     try:
         data = request.json
         task_id = int(data['task_id'])
@@ -487,41 +488,13 @@ def update_task_status():
             # Получаем home_id и пересчитываем статус
             home_id = task.home_id
             n = get_home_status(home_id)[0]
-            color = 'red' if not n else 'green'
+            color = 'red' if not n else ok_color
 
         return jsonify({"status": "success", "task_id": task_id, "blank": int(status), "color": color, "home_id": home_id})
 
     except Exception as e:
         raise e
         return jsonify({"status": "error", "message": str(e)}), 500
-
-def update_task_status_tg(task_id, status):
-    try:
-        with DBsession() as dbsession:
-            # Проверяем существование задачи
-            task = dbsession.query(TaskModel).filter_by(task_id=task_id).first()
-            if not task:
-                return jsonify({"status": "error", "message": "Task not found"}), 404
-
-            # Обновляем статус
-            task.blank = status
-            should_archieved = dbsession.query(SettingsModel).filter_by(
-                user_id=session['user_id']).first()
-            if should_archieved:
-                task.archieved = status
-            dbsession.commit()
-
-            # Получаем home_id и пересчитываем статус
-            home_id = task.home_id
-            n = get_home_status(home_id)[0]
-            color = 'red' if not n else 'green'
-
-        stat = '"выполнено"' if bool(status) else '"не выполнено"'
-        return {"success": True, "message": f"Статус задачи {task_id} изменен на {stat}" }
-
-    except Exception as e:
-        return {"success": False, "message": f"Ошибка: {str(e)}"}
-
 
 
 @app.route('/update_map', methods=['POST'])
