@@ -1,5 +1,16 @@
 let taskListFrozen = false;
 
+function formatTaskId(taskId, maxLength) {
+    if (typeof taskId !== 'string') {
+        taskId = String(taskId);
+    }
+    if (taskId.length > maxLength) {
+        return taskId.substring(0, maxLength - 1) + '…';
+    }
+    return taskId;
+}
+
+
 let markers = {};
 function find_map() {
     let leafletMap = null;
@@ -79,10 +90,11 @@ function createMarker(map, coords, homeData, tasks) {
 }
 function generatePopupContent(homeData, tasks) {
     const { home_id, home_name, home_address } = homeData;
-    const isMobile = window.innerWidth < 768; // Мобильные устройства
+    const isMobile = window.innerWidth < 1000; // Мобильные устройства
 
   const popupWidth = isMobile ? "250px" : "500px";
   const popupHeight = isMobile ? "350px" : "700px";
+  const maxLength = isMobile ? 8 : 14;
     const tasksHtml = tasks.map(task => {
 
         const checked = task.blank === 1 ? "checked" : "";
@@ -92,7 +104,7 @@ function generatePopupContent(homeData, tasks) {
             <div style='display: flex; justify-content: space-between; align-items: center;'>
                 <button onclick='toggleDescription(${task.task_id})'
                         style='border: none; background: none; cursor: pointer; text-align: left; flex-grow: 1;'>
-                    <b>#${task.task_id}</b> - ${task.date}
+                    <b>#${formatTaskId(task.task_id, maxLength)}</b> - ${task.date}
                 </button>
                 <label style='display: flex; align-items: center; white-space: nowrap; margin-left: 10px;'>
                     <input type='checkbox' id='act-checkbox-${task.task_id}'
