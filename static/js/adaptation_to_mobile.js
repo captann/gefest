@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const mapContainer = document.getElementById("map_");
 
     let toggleBtn = document.getElementById("toggleViewBtn");
+    let myLocationBtn = document.getElementById("myLocationBtn");
     const heightDiff = Math.abs(window.innerHeight - prevHeight);
 
       // Если изменяется только высота (например, при появлении клавиатуры), не трогаем layout
@@ -34,6 +35,25 @@ if (!toggleBtn) {
 
     document.body.appendChild(toggleBtn);
 }
+if (!myLocationBtn) {
+    myLocationBtn = document.createElement("button");
+    myLocationBtn.id = "myLocationBtn";
+    myLocationBtn.textContent = "📍";
+    myLocationBtn.style.position = "fixed";
+    myLocationBtn.style.bottom = "65px";
+    myLocationBtn.style.right = "25px";
+    myLocationBtn.style.zIndex = "9999";
+    myLocationBtn.style.background = "rgba(255, 255, 255, 0.9)";
+    myLocationBtn.style.border = "none";
+    myLocationBtn.style.borderRadius = "4px";
+    myLocationBtn.style.padding = "10px 18px";       // ⬅ увеличено
+    myLocationBtn.style.fontSize = "24px";           // ⬅ увеличено
+    myLocationBtn.style.cursor = "pointer";
+    myLocationBtn.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
+
+    document.body.appendChild(myLocationBtn);
+}
+
 
 
     let showingPanel = false;
@@ -84,12 +104,21 @@ if (!toggleBtn) {
 
         // Начнём со скрытой панели
         sidePanel.style.transform = "translateX(-100%)";
+        myLocationBtn.onclick = () => {
+            showMe();
+        }
 
         toggleBtn.onclick = () => {
           if (showingPanel) {
             sidePanel.style.transform = "translateX(-100%)"; // спрятать
+            if (myLocationBtn) {
+            myLocationBtn.style.display = "block";
+            }
           } else {
             sidePanel.style.transform = "translateX(0)"; // показать
+            if (myLocationBtn) {
+            myLocationBtn.style.display = "none";
+            }
           }
           showingPanel = !showingPanel;
 
@@ -127,6 +156,7 @@ if (!toggleBtn) {
   }
 
   if (toggleBtn) toggleBtn.style.display = "none";
+  if (myLocationBtn) myLocationBtn.style.display = "none";
 }
 
 

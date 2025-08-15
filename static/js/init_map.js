@@ -20,11 +20,9 @@ function adaptLayout() {
     if (window.innerWidth) {
         mapContainer.style.width = "";
         panel.style.display = "flex";
-        mobile.style.display = "none";
     } else {
         mapContainer.style.width = "100%";
         panel.style.display = "none";
-        mobile.style.display = "flex";
     }
 
     mapContainer.style.height = window.innerHeight + "px";

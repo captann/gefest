@@ -1001,6 +1001,14 @@ def download_db():
 def about():
     return render_template('about.html')
 
+@app.route('/profile')
+@login_required
+def profile():
+    return "Скоро здесь будет информация о профиле"
+
+@app.route('/feed')
+def feed():
+    return 'Здесь будет лента с полезными адресами'
 
 if __name__ == '__main__':
     import os

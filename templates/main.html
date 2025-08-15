@@ -146,13 +146,6 @@
         <div id="resizer"></div>
         <div id="map_">
         </div>
-        <div id="mobile_panel" style="display:none;" >
-            <input type="text" placeholder="Поиск..." />
-            <div>
-                <label><input type="radio" name="mode" value="tasks"><i>📋</i></label>
-                <label><input type="radio" name="mode" value="zones"><i>📍</i></label>
-            </div>
-    </div>
     </div>
 
     <script>const houses_colors = {{ houses_colors | tojson }};
@@ -183,6 +176,7 @@
     <script src="{{ url_for('static', filename='js/polygons.js') }}"></script>
     <script src="{{ url_for('static', filename='js/generate_report.js') }}"></script>
     <script src="{{ url_for('static', filename='js/change_map_type.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/geolocation.js') }}"></script>
 
 
 
