@@ -22,23 +22,12 @@ function showMe() {
                     }
                 },
                 function(error) {
-                    console.error("Ошибка получения геолокации:", error);
-
-                    // Fallback — координаты Москвы
-                    const fallbackLat = 55.7558;
-                    const fallbackLng = 37.6176;
-
-                    /*L.marker([fallbackLat, fallbackLng])
-                        .addTo(map_)
-                        .bindPopup("Примерное местоположение (Москва)")
-                        .openPopup(); */
-                     createMarker2(map_, [fallbackLat, fallbackLng])
-
-                    map_.setView([fallbackLat, fallbackLng], 17);
+                    showCopyNotification("Ошибка получения геолокации:" +  error, true);
                 }
             );
         } else {
-            alert("Геолокация не поддерживается вашим браузером.");
+            showCopyNotification("Геолокация не поддерживается браузером", true);
+
         }
     } catch (error) {
         console.error("Неожиданная ошибка:", error);

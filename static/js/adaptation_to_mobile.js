@@ -38,7 +38,7 @@ if (!toggleBtn) {
 if (!myLocationBtn) {
     myLocationBtn = document.createElement("button");
     myLocationBtn.id = "myLocationBtn";
-    myLocationBtn.textContent = "📍";
+    myLocationBtn.textContent = "⚐";
     myLocationBtn.style.position = "fixed";
     myLocationBtn.style.bottom = "65px";
     myLocationBtn.style.right = "25px";
@@ -132,6 +132,7 @@ if (!myLocationBtn) {
 
     }  else {
     document.body.classList.remove("mobile-map", "mobile-panel");
+    sidePanel.style.display = 'block';
 
   // Десктопный режим
   if (sidePanel) {
