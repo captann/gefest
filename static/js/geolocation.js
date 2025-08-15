@@ -1,7 +1,9 @@
 let my_marker = null;
 function showMe() {
-myLocationBtn.textContent = "⏳";
-myLocationBtn.setAttribute("disabled", true);
+    myLocationBtn.style.display='none';
+    setTimeout(() => {
+        myLocationBtn.style.display = 'block';
+    }, 5000);
     try {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -19,6 +21,7 @@ myLocationBtn.setAttribute("disabled", true);
 
                         // Перемещаем карту к местоположению пользователя
                         map_.setView([lat, lng], 17);
+
                     } catch (innerError) {
                         console.error("Ошибка при работе с картой:", innerError);
                     }
@@ -35,9 +38,6 @@ myLocationBtn.setAttribute("disabled", true);
         console.error("Неожиданная ошибка:", error);
         // Можно добавить резервный маркер и здесь, если нужно
     }
-    myLocationBtn.textContent = '⚐';
-    myLocationBtn.removeAttribute("disabled");
-
 }
 
 
