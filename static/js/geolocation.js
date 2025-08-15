@@ -1,5 +1,7 @@
 let my_marker = null;
 function showMe() {
+myLocationBtn.textContent = "⏳";
+myLocationBtn.setAttribute("disabled", true);
     try {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -33,6 +35,9 @@ function showMe() {
         console.error("Неожиданная ошибка:", error);
         // Можно добавить резервный маркер и здесь, если нужно
     }
+    myLocationBtn.textContent = '⚐';
+    myLocationBtn.removeAttribute("disabled");
+
 }
 
 
