@@ -48,13 +48,13 @@
 <body>
     <div class="header">
         <h2>Отчёт от {{ date }}</h2>
-        <p>Пользователь: {{ login }}</p>
+        <p>Пользователь: <b>{{ login }}</b></p>
         <div class="polygons">
             {% if polygons %}
-                Отчёт сформирован по выбранным областям:<br>
-                {{ polygons.replace('\n', '<br>') | safe }}
+                Отчёт сформирован для  <b>{{ type }}</b> по следующим областям:<br>
+                <b>{{ polygons.replace('\n', '<br>') | safe }}</b>
             {% else %}
-                Отчёт сформирован по <strong>всем</strong> полигонам.
+                Отчёт сформирован по <b>всем</b> полигонам.
             {% endif %}
         </div>
     </div>

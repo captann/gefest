@@ -1,7 +1,6 @@
 from openpyxl import load_workbook
 import requests
 from sqlalchemy import create_engine
-
 from typing import List, Tuple, Optional, Dict
 from models import *
 from split_location import parse
@@ -9,12 +8,12 @@ from sqlalchemy.orm import sessionmaker
 import os
 from urllib.parse import quote_plus
 
-from app_config import remote, creds_path, YANDEX_MAPS_API_KEY
+from app_config import remote, creds_path, YANDEX_MAPS_API_KEY, DB_FILE
 
 if remote:
     pass
 else:
-    sqlite_engine = create_engine('sqlite:///address_new.db')
+    sqlite_engine = create_engine(f'sqlite:///{DB_FILE}')
 
     Session = sessionmaker(bind=sqlite_engine)
 
@@ -29,7 +28,6 @@ def successful(message):
     return {"success": True,
             "message": message}
 
-DB_FILE = "address_new.db"
 
 
 """DATABASE_URL = f"sqlite:///{DB_FILE}"  # ← путь к твоему .db файлу
@@ -420,8 +418,8 @@ class Task:
         self.correct_location(address)
         self.get_lon_lan()
         self.problem = problem
-        self.ppr = ppr
         self.solution = solution
+        self.ppr = ppr
         self._save_task_to_db()
 
     def correct_date(self, date):
@@ -451,17 +449,19 @@ class Task:
             try:
                 existing_task = session.query(TaskModel).filter_by(task_id=self.task_id).first()
                 self.already_exist = bool(existing_task)
-
-                record = session.query(TaskModel).filter(
-                    TaskModel.task_id == self.task_id,
-                    TaskModel.is_ppr == 0
-                ).first()
-                # если не ппр, т.е. более высокий приоритет
-                if record:
-                    self.already_exist = False
-                    record.task_id = generate_ppr_id(self.home_id)
-                    session.commit()
-
+                if self.already_exist:
+                    record = session.query(TaskModel).filter(
+                        TaskModel.task_id == self.task_id,
+                        TaskModel.is_ppr == 0
+                    ).first()
+                    # проверка, что сущеуствущая задача - заявка, а не ппр
+                    # если задача - заявка, но она запрашивается как ППР - до для этой ППР создаем новую
+                    if record and self.ppr:
+                        print(1)
+                        self.already_exist = False
+                        """record.task_id = generate_ppr_id(self.home_id)
+                        session.commit()"""
+                        self.task_id = generate_ppr_id(self.home_id)
                 if not self.already_exist:
                     new_task = TaskModel(
                         task_id=self.task_id,
@@ -545,7 +545,8 @@ class Task:
                     problem=t.problem,
                     solution=t.solution,
                     blank=t.blank,
-                    archieved=t.archieved  # ← добавлено
+                    archieved=t.archieved,
+                    ppr=t.is_ppr
                 )
 
                 if task_type == 0:
@@ -898,12 +899,13 @@ def main(**kwargs):
             )
 
             if address.is_valid and not address.submit_required:
-                task = Task(int(row[columns_to_read["task_id"]]),
-                     row[columns_to_read["date"]],
-                     address,
-                     row[columns_to_read["problem"]],
-                     row[columns_to_read["solution"]],
-                     bool(row[columns_to_read["blank"]] == kwargs.get("checked_value", ""))
+                task = Task(task_id=int(row[columns_to_read["task_id"]]),
+                     date=row[columns_to_read["date"]],
+                     address=address,
+                     problem=row[columns_to_read["problem"]],
+                     solution=row[columns_to_read["solution"]],
+                     blank=bool(row[columns_to_read["blank"]] == kwargs.get("checked_value", "")),
+                    ppr=False
                      )
                 if task.already_exist and task.blank:
                     already_existing.append({
@@ -972,12 +974,13 @@ def main(**kwargs):
                 )
 
                 if address.is_valid and not address.submit_required:
-                    task = Task(int(row["task_id"]),
-                         row["date"],
-                         address,
-                         row["problem"],
-                         row["solution"],
-                         bool(row["blank"] == kwargs.get("checked_value", "Да"))
+                    task = Task(task_id=int(row["task_id"]),
+                         date=row["date"],
+                         address=address,
+                         problem=row["problem"],
+                         solution=row["solution"],
+                         blank=bool(row["blank"] == kwargs.get("checked_value", "Да")),
+                         ppr=False
                          )
 
                     if task.already_exist and  task.blank:
@@ -1031,7 +1034,6 @@ def make_ppr(**kwargs):
         creds_path=creds_path
     )
     if result["success"]:
-        print(result)
         for i, row in enumerate(result['data'], start=1):
             if all(str(cell).strip() == '' for cell in row.values()):
                 break
@@ -1050,8 +1052,15 @@ def make_ppr(**kwargs):
                 task = Task(task_id=generate_ppr_id(address.home_id),
                             date="",
                             address=address,
-                            problem=f"Требуется выполнить ППР. ИД1: {row['ppr_ID1']}." + int(bool(row['ppr_ID2'])) * '\n'f"ИД2: {row['ppr_ID2']}." ,
-                            solution='',
+                            problem=(
+                                    f"ППР"
+                                    + '\n<br>'
+                                    + f"ИД1: {row['ppr_ID1']}"
+                                    + (int(bool(row['ppr_ID2'])) * ('\n<br>' + f"ИД2: {row['ppr_ID2']}"))
+
+                            ),
+
+                solution='',
                             blank=False,
                             ppr=True
                             )

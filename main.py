@@ -98,7 +98,6 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True  # Автоматическая пе�
 
 
 
-DB_FILE = "address_new.db"
 import random
 
 def generate_random_color():
@@ -588,6 +587,9 @@ def generate_report():
     req = request.get_json()
     report_data = req['reportData']
     polygons_data = req['polygonsData']
+    tp = {"/": "задач",
+          "/tasks": "заявок",
+          "/ppr": "ППР"}
     polygons_data = [polygons_data[i]["name"] for i in polygons_data if polygons_data[i]['checked']]
     polygons = "\n".join(polygons_data) if polygons_data else ""
 
@@ -602,7 +604,8 @@ def generate_report():
         date=current_time,
         keys=keys,
         login=login,
-        polygons=polygons
+        polygons=polygons,
+        type=tp[req['report_type']]
     )
 
     return rendered_html
@@ -1001,7 +1004,6 @@ def about():
 
 if __name__ == '__main__':
     import os
-    print(generate_password_hash('lksdnflsnlkndsndsnfsdlknjfdslknfdsa'))
     app.run(host='0.0.0.0', port=8080)
 
 

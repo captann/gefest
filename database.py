@@ -1,9 +1,10 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base  # импорт моделей (Address, Task и т.д.)
+from app_config import DB_FILE
 
 # Пример подключения к SQLite
-DATABASE_URL = "sqlite:///address_new.db"
+DATABASE_URL = f"sqlite:///{DB_FILE}"
 
 # Или PostgreSQL (замени значениями)
 # DATABASE_URL = "postgresql://user:password@host:port/dbname"

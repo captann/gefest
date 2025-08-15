@@ -214,6 +214,9 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     setTimeout(() => {
         status.textContent = '';
     }, 3000);
+    if (result.already_existing.length > 0) {
+        renderAlreadyExistingTasksTable(result.already_existing);
+    }
 }
  else {
  status.innerHTML = `<span style="color: red;">&#10060;</span> ${result.message || 'Ошибка загрузки'}`;

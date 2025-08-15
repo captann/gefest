@@ -576,13 +576,21 @@ window.toggleDescription = function(taskId) {
     // Копируем taskId в буфер
     const desc = document.getElementById('desc-' + taskId);
         desc.style.display = desc.style.display === 'none' ? 'block' : 'none';
+    text = `ID скопирован`;
     navigator.clipboard.writeText(taskId).then(() => {
-        showCopyNotification(`ID ${taskId} скопирован в буфер обмена`);
+        showCopyNotification(text);
     }).catch(() => {
         showCopyNotification('❌ Не удалось скопировать ID', true);
     });
 };
 
+function copyAddress(text) {
+navigator.clipboard.writeText(text).then(() => {
+        showCopyNotification("Адрес скопирован");
+    }).catch(() => {
+        showCopyNotification('❌ Не удалось скопировать ID', true);
+    });
+}
 // Универсальный показ уведомления
 function showCopyNotification(message, isError = false) {
     const note = document.createElement('div');

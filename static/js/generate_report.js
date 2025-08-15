@@ -30,7 +30,8 @@ async function generateReport() {
             const payload = {
             reportData: reportData,
             polygonsData: polygonsData,  // добавленное поле
-            date: formattedDate
+            date: formattedDate,
+            report_type: document.getElementById("map-change-section").value
         };
         const response = await fetch('/generate_report', {
             method: 'POST',
