@@ -104,8 +104,8 @@ if (!myLocationBtn) {
 
         // Начнём со скрытой панели
         sidePanel.style.transform = "translateX(-100%)";
-        myLocationBtn.onclick = () => {
-            showMe();
+        myLocationBtn.onclick = (e) => {
+            showMe(e);
         }
 
         toggleBtn.onclick = () => {

@@ -1,9 +1,10 @@
 let my_marker = null;
-function showMe() {
-    myLocationBtn.style.display='none';
-    setTimeout(() => {
-        myLocationBtn.style.display = 'block';
-    }, 5000);
+let err = 0;
+
+function showMe(e) {
+    e.stopPropagation();
+    myLocationBtn.style.display = 'none';
+
     try {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -12,31 +13,34 @@ function showMe() {
                         const lat = position.coords.latitude;
                         const lng = position.coords.longitude;
 
-                        // Создаём маркер на карте
-                        createMarker2(map_, [lat, lng])
-                        /*L.marker([lat, lng])
-                            .addTo(map_)
-                            .bindPopup("Вы находитесь здесь!")
-                            .openPopup(); */
+                        // Создаём маркер
+                        my_marker = createMarker2(map_, [lat, lng]);
 
                         // Перемещаем карту к местоположению пользователя
                         map_.setView([lat, lng], 17);
 
+                        // ✅ Показываем кнопку только после того, как всё готово
+                        myLocationBtn.style.display = 'block';
+
                     } catch (innerError) {
-                        console.error("Ошибка при работе с картой:", innerError);
+                        err = 1;
+                        showCopyNotification("Ошибка при работе с картой: " + innerError, true);
                     }
                 },
                 function(error) {
-                    showCopyNotification("Ошибка получения геолокации:" +  error, true);
+                    showCopyNotification("Ошибка получения геолокации: " + error, true);
+                    myLocationBtn.style.display = 'block';
                 }
             );
         } else {
             showCopyNotification("Геолокация не поддерживается браузером", true);
-
+            err = 1;
+            myLocationBtn.style.display = 'block';
         }
     } catch (error) {
-        console.error("Неожиданная ошибка:", error);
-        // Можно добавить резервный маркер и здесь, если нужно
+        showCopyNotification("Неожиданная ошибка: " + error, true);
+        err = 1;
+        myLocationBtn.style.display = 'block';
     }
 }
 
@@ -44,7 +48,8 @@ function showMe() {
 
 function createMarker2(map, coords) {
     if (my_marker) {
-        my_marker.remove()
+        my_marker.remove();
+        my_marker = null;
     }
     const markerHtml = `
         <div id="marker-my-location" style="
