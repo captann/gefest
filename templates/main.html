@@ -45,9 +45,15 @@
     <div id="main-container">
         <div id="blok_pannel" style="display:none;">
             <div id="user-bar">
+                {% if user_role_weight > 0 %}
+                    <div class="user-item left">
+                        <a href="/control_panel" title="{{role_name}}">{{ role_icons.get(user.role, "❓") }}</a> {{ user.login }}
+                    </div>
+                {% else %}
                 <div class="user-item left">
-                    <a href="/control_panel">{{ role_icons.get(user.role, "❓") }}</a> {{ user.login }}
+                        <a href="/#" title="{{role_name}}">{{ role_icons.get(user.role, "❓") }}</a> {{ user.login }}
                 </div>
+                {% endif %}
 
                 <div class="user-item center">
                     <a href="https://forms.yandex.ru/u/686c1c5b02848fb6f2036cab/" target="_blank">
@@ -138,7 +144,7 @@
                 </div>
             </div>
             <footer class="footer" id="footer">
-                <span>Сделано СЗАО. β-версия.</span>
+                <span>Сделано СЗАО. RC-версия.</span>
                 <a class="link-only" href="/about" id="help" target="_blank" style="font-size:14px;">Помощь</a>
             </footer>
 
@@ -155,7 +161,7 @@
             let user = {{ user | tojson }};
             let holdings = [];
             let holdingsDict = {};
-
+            const user_role_weight = {{ user_role_weight }};
     </script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

@@ -74,7 +74,7 @@ class SharedPolygonModel(Base):
 
     polygon_id = Column(Integer, ForeignKey('polygons.polygon_id'), primary_key=True)
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
-    hash = Column(Text)
+    hash = Column(Text, unique=True)
     confirm_code = Column(Integer)
     used = Column(Integer)
     number_of_using = Column(Integer)

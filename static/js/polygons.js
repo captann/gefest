@@ -444,7 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const [center, zoom] = update_map_params();
                 find_map().setView([center[1], center[0]], zoom);
             }
-        if (!compareStates(initialAreaState, finalAreaState)) {
+
+        if ((typeof initialAreaState === 'undefined') || !compareStates(initialAreaState, finalAreaState)) {
             let leafletMap = null;
             for (const key in window) {
                 if (key.startsWith('map_') && window[key] instanceof L.Map) {

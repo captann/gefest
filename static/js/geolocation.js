@@ -3,7 +3,8 @@ let err = 0;
 
 function showMe(e) {
     e.stopPropagation();
-    myLocationBtn.style.display = 'none';
+    myLocationBtn.textContent = "…";
+    myLocationBtn.setAttribute("disabled", true);
 
     try {
         if (navigator.geolocation) {
@@ -20,27 +21,32 @@ function showMe(e) {
                         map_.setView([lat, lng], 17);
 
                         // ✅ Показываем кнопку только после того, как всё готово
-                        myLocationBtn.style.display = 'block';
-
+                        myLocationBtn.textContent = "⚐";
+                        myLocationBtn.removeAttribute("disabled");
                     } catch (innerError) {
                         err = 1;
                         showCopyNotification("Ошибка при работе с картой: " + innerError, true);
+                        myLocationBtn.textContent = "⚐";
+                        myLocationBtn.removeAttribute("disabled");
                     }
                 },
                 function(error) {
                     showCopyNotification("Ошибка получения геолокации: " + error, true);
-                    myLocationBtn.style.display = 'block';
+                    myLocationBtn.textContent = "⚐";
+                    myLocationBtn.removeAttribute("disabled");
                 }
             );
         } else {
             showCopyNotification("Геолокация не поддерживается браузером", true);
             err = 1;
-            myLocationBtn.style.display = 'block';
+            myLocationBtn.textContent = "⚐";
+            myLocationBtn.removeAttribute("disabled");
         }
     } catch (error) {
         showCopyNotification("Неожиданная ошибка: " + error, true);
         err = 1;
-        myLocationBtn.style.display = 'block';
+        myLocationBtn.textContent = "⚐";
+        myLocationBtn.removeAttribute("disabled");
     }
 }
 

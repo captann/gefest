@@ -407,13 +407,13 @@
                                         {% if weight <= role_weights[current_user_role] %}
                                             <option value="{{ available_role }}"
                                                     {% if available_role == target_role %}selected{% endif %}>
-                                                {{ available_role }}
+                                                {{ role_icons.get(available_role, available_role)}} {{ role_names.get(available_role, available_role) }}
                                             </option>
                                         {% endif %}
                                     {% endfor %}
                                 </select>
                             {% else %}
-                                <p>{{ target_role }}</p>
+                                <p>{{ role_icons.get(target_role, target_role)}} {{ role_names.get(target_role, target_role) }}</p>
                             {% endif %}
                         </td>
                     </tr>

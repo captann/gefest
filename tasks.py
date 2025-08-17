@@ -168,7 +168,7 @@ class User:
                     new_user = UserModel(
                         login=self.login,
                         password=self.password,
-                        role='user'
+                        role='guest'
                     )
                     session.add(new_user)
                     session.commit()

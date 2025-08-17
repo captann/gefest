@@ -237,6 +237,9 @@ def is_hash_valid(hash):
 @app.route('/share/user_id=<int:user_id>&area_id=<int:area_id>')
 @login_required
 def share_area(user_id, area_id):
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     # Генерируем код
     code = f"{random.randint(0, 9999):04d}"
 
@@ -274,8 +277,14 @@ def validate_share_code(hash, user_id, *code):
     with DBsession() as dbsession:
         try:
             record = dbsession.query(SharedPolygonModel).filter_by(hash=hash).first()
+
             if record:
-                record.number_of_using = (record.number_of_using or 0) + 1
+                dbsession.query(SharedPolygonModel).filter(
+                    SharedPolygonModel.hash == hash,
+                ).update(
+                    {SharedPolygonModel.number_of_using: (record.number_of_using or 0) + 1},
+                    synchronize_session=False,
+                )
                 dbsession.commit()
         except Exception as e:
             dbsession.rollback()
@@ -297,6 +306,8 @@ def validate_share_code(hash, user_id, *code):
 @login_required
 def add_area(hash):
     current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     user_id = current_user.user_id
     if request.method == 'POST':
         data = request.get_json()
@@ -327,12 +338,15 @@ def add_area(hash):
         name_exist = Polygon.check_name(name, current_user.user_id)
         return render_template('add_area.html', name_exist=name_exist, name=name)
 
-@app.route('/')
 @app.route('/tasks')
 @app.route('/ppr')
+@app.route('/')
 @login_required
 def index():
     current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
+
     if True:
         task_types = {"/": 0,
                       "/tasks": 1,
@@ -409,7 +423,9 @@ def index():
             user={"user_id": current_user.user_id, "login": current_user.login, "role": current_user.role},
             homes=home_dict,
             tasks=test_mode,
-            task_type=task_type
+            task_type=task_type,
+            user_role_weight=role_weights.get(current_user.role, 0),
+            role_name=role_names.get(current_user.role, '')
         )
     else:
         pass
@@ -438,10 +454,14 @@ def login():
 
         with DBsession() as dbsession:
             user = dbsession.query(UserModel).filter_by(login=login).first()
-            user_data = (user.user_id, user.password) if user else None
+            user_data = (user.user_id, user.password, user.role) if user else None
 
         if user_data and check_password_hash(user_data[1], password):
-            session['user_id'] = user_data[0]
+            user_data = {'user_id': user_data[0], 'login': login, 'role': user_data[2]}
+            if role_weights.get(user_data['role']) < 0:
+                error = "Ваша учетная запись заблокирована"
+                return render_template('login.html', error=error, reg=REG)
+            session['user_id'] = user_data['user_id']
             redirect_url = next_page if next_page and is_safe_url(next_page) else url_for('index')
             resp = make_response(redirect(redirect_url))
             if remember:
@@ -465,6 +485,9 @@ def logout():
 @app.route('/update_task_status', methods=['POST'])
 @login_required
 def update_task_status():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     ok_color = 'green'
     try:
         data = request.json
@@ -499,7 +522,6 @@ def update_task_status():
 @app.route('/update_map', methods=['POST'])
 def update_map():
     data = request.json
-    #print(data)
     for point in data:
         update_polygon_state(int(point), data[point])
     return jsonify({"status": "success"})
@@ -507,6 +529,9 @@ def update_map():
 @app.route('/save_area', methods=['POST'])
 @login_required
 def save_area():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     data = request.json
     name = data["name"]
     if Polygon.check_name(name, session['user_id']):
@@ -560,7 +585,7 @@ def register():
                 if existing_user:
                     error = "Пользователь с таким логином уже существует"
                 else:
-                    new_user = UserModel(login=login, password=generate_password_hash(password), role='user')
+                    new_user = UserModel(login=login, password=generate_password_hash(password), role='guest')
                     dbsession.add(new_user)
                     dbsession.commit()
                     dbsession.refresh(new_user)
@@ -583,6 +608,9 @@ def register():
 @app.route("/generate_report", methods=["POST"])
 @login_required
 def generate_report():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     login = User.get_by_id(session['user_id']).login
     req = request.get_json()
     report_data = req['reportData']
@@ -614,8 +642,13 @@ def generate_report():
 @login_required
 def control_panel():
     current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     current_user_role = current_user.role
     tasks = Task.get_tasks()
+    user_role_weight = role_weights.get(current_user.role, 0)
+    if user_role_weight < 0:
+        return redirect('/')
 
     with DBsession() as dbsession:
         users = dbsession.query(UserModel).all()
@@ -649,12 +682,17 @@ def control_panel():
         addresses=data,
         role_weights=role_weights,
         user_role_weight=user_role_weight,
-        settings=settings  # 👈 вот это ключевое!
+        settings=settings,  # 👈 вот это ключевое!
+        role_names=role_names,
+        role_icons=role_icons
     )
 
 @app.route('/update_role', methods=['POST'])
 @login_required
 def update_role():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     try:
         data = request.get_json()
         if not data:
@@ -670,9 +708,10 @@ def update_role():
             user_id = int(user_id_str)
         except ValueError:
             return jsonify(success=False, message="Некорректный ID")
-
-        if new_role not in ["user", "admin"]:
-            return jsonify(success=False, message="Недопустимая роль")
+        for i in role_names:
+            if role_names[i] == new_role:
+                new_role = i
+                break
         with DBsession() as dbsession:
             user = dbsession.query(UserModel).filter_by(user_id=user_id).first()
             if user:
@@ -816,7 +855,9 @@ def favicon():
 @app.route('/toggle_auto_archive', methods=['POST'])
 @login_required
 def toggle_auto_archive():
-    current_user_id = session['user_id']
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     data = request.get_json()
 
     current_user = User.get_by_id(session['user_id'])
@@ -843,6 +884,9 @@ def toggle_auto_archive():
 @app.route('/set_task_archived', methods=['POST'])
 @login_required
 def set_task_archived():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     data = request.get_json()
     task_id = data.get("task_id")
     archieved = data.get("archieved")
@@ -865,6 +909,9 @@ def set_task_archived():
 @app.route('/bulk_update_archived', methods=['POST'])
 @login_required
 def bulk_update_archived():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     data = request.get_json()
     task_ids = data.get("task_ids")
     archieved = data.get("archieved")
@@ -904,6 +951,9 @@ def write_db_data(task_id: int):
 @app.route('/synchronice', methods=['POST'])
 @login_required
 def synchronice():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     sheet = request.form.get('sheet')
     link = request.form.get('link')
 
@@ -983,6 +1033,9 @@ def update_existing_tasks():
 @app.route('/download_db')
 @login_required
 def download_db():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     uid = session.get('user_id', 0)
     if uid == 0:
 
@@ -1004,11 +1057,70 @@ def about():
 @app.route('/profile')
 @login_required
 def profile():
+    current_user = User.get_by_id(session['user_id'])
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
     return "Скоро здесь будет информация о профиле"
 
 @app.route('/feed')
 def feed():
     return 'Здесь будет лента с полезными адресами'
+
+@app.route('/123', methods=["POST"])
+def update_activation_number():
+    data = request.get_json(force=True)  # принудительно парсим JSON
+
+    hash = data.get("linkSuffix", "").removeprefix('/add_area/')
+    user_id = data.get("user_id", False)
+    activation_number = data.get("activationNumber", False)
+
+
+    if not hash or not activation_number  or not user_id:
+        return jsonify({"error": "Недостаточно данных"}), 400
+
+    # защита от некорректных значений
+    try:
+        activation_number = min(int(activation_number), 1000)
+    except ValueError:
+        return jsonify({"error": "activationNumber должно быть числом"}), 400
+
+    if activation_number < 0:
+        return jsonify({"error": "activationNumber не может быть отрицательным"}), 400
+    try:
+        with DBsession() as dbsession:
+            shared_list = (
+                dbsession.query(SharedPolygonModel)
+                .filter(SharedPolygonModel.hash == hash)
+                .all()
+            )
+
+
+            if len(shared_list) == 0:
+                return jsonify({"error": "Запись не найдена"}), 404
+
+            if len(shared_list) > 1:
+                return jsonify({"error": f"Найдено несколько записей ({len(shared_list)}) для hash={hash}"}), 500
+
+            shared = shared_list[0]
+
+            if shared.user_id != int(user_id):
+                return jsonify({"error": "Доступ запрещен"}), 403
+            dbsession.query(SharedPolygonModel).filter(
+                SharedPolygonModel.hash == hash,
+            ).update(
+                {SharedPolygonModel.number_of_using: activation_number},
+                synchronize_session=False,
+            )
+            dbsession.commit()
+
+        return jsonify(
+                {
+                    "success": True
+                }
+            )
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     import os

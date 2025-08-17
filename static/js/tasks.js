@@ -95,33 +95,35 @@ function generatePopupContent(homeData, tasks) {
   const popupWidth = isMobile ? "250px" : "500px";
   const popupHeight = isMobile ? "350px" : "700px";
   const maxLength = isMobile ? 8 : 14;
-    const tasksHtml = tasks.map(task => {
+  const tasksHtml = tasks.map(task => {
+    const checked = task.blank === 1 ? "checked" : "";
 
-        const checked = task.blank === 1 ? "checked" : "";
-        return `
-        <div class='task-item-2' style='margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;'
-             data-task-id="${task.task_id}" home_id="${home_id}">
-            <div style='display: flex; justify-content: space-between; align-items: center;'>
-                <button onclick='toggleDescription(${task.task_id})'
-                        style='border: none; background: none; cursor: pointer; text-align: left; flex-grow: 1;'>
-                    <b>#${formatTaskId(task.task_id, maxLength)}</b> - ${task.date}
-                </button>
-                <label style='display: flex; align-items: center; white-space: nowrap; margin-left: 10px;'>
-                    <input type='checkbox' id='act-checkbox-${task.task_id}'
-                           style='margin-right: 5px;'
-                           replace_me_id='${task.task_id}'
-                           onclick='event.stopPropagation()'
-                           data-task-id='${task.task_id}' ${checked}>
-                    Акт готов
-                </label>
-            </div>
-            <div id='desc-${task.task_id}' style='display: none; margin-top: 10px; padding-left: 10px;font-size:18px;'>
-                <p><b>Проблема:</b> ${task.problem}</p>
-                <p><b>Решение:</b> ${task.solution}</p>
-            </div>
+    return `
+    <div class='task-item-2' style='margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;'
+         data-task-id="${task.task_id}" home_id="${home_id}">
+        <div style='display: flex; justify-content: space-between; align-items: center;'>
+            <button onclick='toggleDescription(${task.task_id})'
+                    style='border: none; background: none; cursor: pointer; text-align: left; flex-grow: 1;'>
+                <b>#${formatTaskId(task.task_id, maxLength)}</b> - ${task.date}
+            </button>
+            ${user_role_weight > 0 ? `
+            <label style='display: flex; align-items: center; white-space: nowrap; margin-left: 10px;'>
+                <input type='checkbox' id='act-checkbox-${task.task_id}'
+                       style='margin-right: 5px;'
+                       replace_me_id='${task.task_id}'
+                       onclick='event.stopPropagation()'
+                       data-task-id='${task.task_id}' ${checked}>
+                Акт готов
+            </label>
+            ` : ''}
         </div>
-        `;
-    }).join("");
+        <div id='desc-${task.task_id}' style='display: none; margin-top: 10px; padding-left: 10px;font-size:18px;'>
+            <p><b>Проблема:</b> ${task.problem}</p>
+            <p><b>Решение:</b> ${task.solution}</p>
+        </div>
+    </div>
+    `;
+}).join("");
 
     return `
     <div class="popup-mobile" style="max-width: ${popupWidth}; max-height: ${popupHeight}; overflow-y: auto;">
@@ -204,21 +206,21 @@ for (let homeId of sorted) {
         label.style.alignItems = "center";
         label.style.whiteSpace = "nowrap";
         label.style.marginLeft = "10px";
+        if (user_role_weight > 0) {
+            let checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.id = `menu-checkbox-${task.task_id}`;
+            checkbox.setAttribute("data-task-id", task.task_id);
+            checkbox.setAttribute("replace_me_id", task.task_id);
+            checkbox.style.marginRight = "5px";
+            checkbox.onclick = (event) => event.stopPropagation();
+            if (task.blank == 1) {
+                checkbox.setAttribute("checked", true);
+            }
 
-        let checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.id = `menu-checkbox-${task.task_id}`;
-        checkbox.setAttribute("data-task-id", task.task_id);
-        checkbox.setAttribute("replace_me_id", task.task_id);
-        checkbox.style.marginRight = "5px";
-        checkbox.onclick = (event) => event.stopPropagation();
-        if (task.blank == 1) {
-            checkbox.setAttribute("checked", true);
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode("Акт готов"));
         }
-
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode("Акт готов"));
-
         // ✅ добавляем всё в taskDiv
         taskDiv.appendChild(taskIdDiv);
         taskDiv.appendChild(label);
