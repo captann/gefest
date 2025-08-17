@@ -33,8 +33,8 @@ if (data.success) {
         toast.classList.add('hidden');
     }, 2000);
 
-    document.querySelectorAll('.code-digit-input').forEach(el => el.value = '');
-    document.querySelector('.code-digit-input').focus();
+    document.querySelectorAll('.help-class').forEach(el => el.value = '');
+    document.querySelector('.help-class').focus();
 }
 
 
@@ -42,7 +42,7 @@ if (data.success) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    const inputs = document.querySelectorAll('.code-digit-input');
+    const inputs = document.querySelectorAll('.help-class');
 
     inputs.forEach((input, index) => {
         input.addEventListener('input', () => {
@@ -58,6 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 submitCode(code);  // вызов твоей функции
             }
         });
+
+
+
 
         input.addEventListener('keydown', (e) => {
             if (e.key === 'Backspace' && input.value === '' && index > 0) {

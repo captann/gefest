@@ -52,10 +52,11 @@ function newList(polygonsData, sortedKeys = null, userId = user) {
     const keys = sortedKeys || Object.keys(polygonsData);
 
     if (!keys.length) {
+
         document.getElementById("area-search").setAttribute("hidden", true);
         document.getElementById("areas-container").setAttribute("hidden", true);
         document.getElementById("area-title").setAttribute("hidden", true);
-        return "";
+        console.log(document.getElementById("area-title"));
     } else {
         document.getElementById("area-search").removeAttribute("hidden");
         document.getElementById("areas-container").removeAttribute("hidden");

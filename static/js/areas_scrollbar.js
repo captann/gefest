@@ -8,7 +8,6 @@ areaList.addEventListener('scroll', () => {
     const scrollTop = areaList.scrollTop;
     const scrollHeight = areaList.scrollHeight;
     const clientHeight = areaList.clientHeight;
-
     const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
 
     // показать полосу вместо заголовка

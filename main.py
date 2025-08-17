@@ -238,6 +238,8 @@ def is_hash_valid(hash):
 @login_required
 def share_area(user_id, area_id):
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     # Генерируем код
@@ -306,6 +308,8 @@ def validate_share_code(hash, user_id, *code):
 @login_required
 def add_area(hash):
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     user_id = current_user.user_id
@@ -344,6 +348,8 @@ def add_area(hash):
 @login_required
 def index():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
 
@@ -466,7 +472,7 @@ def login():
             resp = make_response(redirect(redirect_url))
             if remember:
                 expires = datetime.datetime.now() + datetime.timedelta(weeks=1)
-                resp.set_cookie('remember_token', str(user_data[0]), expires=expires)
+                resp.set_cookie('remember_token', str(user_data['user_id']), expires=expires)
             return resp
         else:
             error = "Неверный логин или пароль"
@@ -486,6 +492,8 @@ def logout():
 @login_required
 def update_task_status():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     ok_color = 'green'
@@ -530,6 +538,8 @@ def update_map():
 @login_required
 def save_area():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     data = request.json
@@ -609,6 +619,8 @@ def register():
 @login_required
 def generate_report():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     login = User.get_by_id(session['user_id']).login
@@ -642,6 +654,8 @@ def generate_report():
 @login_required
 def control_panel():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     current_user_role = current_user.role
@@ -691,6 +705,8 @@ def control_panel():
 @login_required
 def update_role():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     try:
@@ -856,11 +872,15 @@ def favicon():
 @login_required
 def toggle_auto_archive():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     data = request.get_json()
 
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if current_user.role != "admin":
         return redirect('/')
 
@@ -870,10 +890,10 @@ def toggle_auto_archive():
     new_state = bool(data['state'])
 
     with DBsession() as dbsession:
-        settings = dbsession.query(SettingsModel).filter_by(user_id=current_user_id).first()
+        settings = dbsession.query(SettingsModel).filter_by(user_id=current_user.user_id).first()
 
         if not settings:
-            settings = SettingsModel(user_id=current_user_id, auto_archive_done_tasks=new_state)
+            settings = SettingsModel(user_id=current_user.user_id, auto_archive_done_tasks=new_state)
             dbsession.add(settings)
         else:
             settings.auto_archive_done_tasks = new_state
@@ -885,6 +905,8 @@ def toggle_auto_archive():
 @login_required
 def set_task_archived():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     data = request.get_json()
@@ -910,6 +932,8 @@ def set_task_archived():
 @login_required
 def bulk_update_archived():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     data = request.get_json()
@@ -952,6 +976,8 @@ def write_db_data(task_id: int):
 @login_required
 def synchronice():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     sheet = request.form.get('sheet')
@@ -1034,6 +1060,8 @@ def update_existing_tasks():
 @login_required
 def download_db():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     uid = session.get('user_id', 0)
@@ -1058,6 +1086,8 @@ def about():
 @login_required
 def profile():
     current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
     return "Скоро здесь будет информация о профиле"

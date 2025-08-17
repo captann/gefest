@@ -397,7 +397,7 @@ function toggleContainers() {
         if (element) {
             element.removeAttribute('hidden');
         }
-        document.getElementById("area-title").removeAttribute("hidden");
+
 
         hideMarkers();
         document.getElementById('add-area-btn').setAttribute('hidden','true')

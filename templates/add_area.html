@@ -1,41 +1,34 @@
 <!DOCTYPE html>
-<html lang="ru" xmlns="http://www.w3.org/1999/html">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Добавление области</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/share_page.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
 <body>
     <div id="share-container">
         <h2>Введите код</h2>
         <p>Введите проверочный код, чтобы добавить область.</p>
-
         <form id="confirm-form">
-             {% if name %}
-        <input type="text"
-               id="area-name"
-               name="area-name"
-               placeholder="Название области"
-               value="{{ name }}"
-               {% if  not name_exist %}disabled{% endif %}
-               >
-                  {% endif %}
+            {% if name %}
+            <input type="text"
+                   id="area-name"
+                   name="area-name"
+                   placeholder="Название области"
+                   value="{{ name }}"
+                   {% if not name_exist %}disabled{% endif %}
+                   >
+            {% endif %}
             <div class="code-input-container">
-                <input type="text" class="code-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
-                <input type="text" class="code-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
-                <input type="text" class="code-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
-                <input type="text" class="code-digit-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="number" class="code-digit help-class" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="number" class="code-digit help-class" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="number" class="code-digit help-class" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
+                <input type="number" class="code-digit help-class" maxlength="1" inputmode="numeric" pattern="[0-9]*" required>
             </div>
-
-            <p class="note">Проверьте код перед подтверждением.</p>
-
         </form>
     </div>
-
     <div id="copy-toast" class="copy-toast hidden">Добавлено</div>
-
     <script src="{{ url_for('static', filename='js/add_area.js') }}"></script>
 </body>
 </html>

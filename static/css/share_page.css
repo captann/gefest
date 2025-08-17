@@ -15,6 +15,8 @@ body {
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 90%;
 }
 
 #share-container h2 {
@@ -32,6 +34,7 @@ body {
 .code-input-container {
     display: flex;
     justify-content: center;
+    flex-wrap: wrap;
     gap: 10px;
     margin: 20px 0;
 }
@@ -50,7 +53,8 @@ body {
     pointer-events: none;
 }
 
-#copy-close-btn {
+#copy-close-btn,
+.btn {
     background-color: #00bfa6;
     color: #111;
     padding: 10px 20px;
@@ -60,9 +64,12 @@ body {
     border-radius: 6px;
     cursor: pointer;
     transition: background-color 0.2s ease;
+    width: 100%;
+    max-width: 300px;
 }
 
-#copy-close-btn:hover {
+#copy-close-btn:hover,
+.btn:hover {
     background-color: #00a38f;
 }
 
@@ -91,33 +98,6 @@ body {
     transform: translateX(-50%) translateY(10px);
 }
 
-.code-digit-input {
-    width: 60px;
-    height: 80px;
-    font-size: 32px;
-    text-align: center;
-    border: none;
-    border-radius: 8px;
-    background: #2a2a2a;
-    color: #00a38f;
-    box-shadow: 0 0 5px #00a38f55;
-    font-weight: bold;
-}
-.btn {
-    background-color: #00bfa6;
-    color: #111;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.btn:hover {
-    background-color: #00a38f;
-}
 .link-only {
     font-size: 13px;
     color: #00a38f;
@@ -125,14 +105,17 @@ body {
     cursor: pointer;
     margin-top: 10px;
     transition: color 0.2s ease;
+    display: inline-block;
 }
 
 .link-only:hover {
     color: #00e699;
 }
+
 #area-name {
     margin-bottom: 20px;
     width: 250px;
+    max-width: 100%;
     padding: 10px;
     background-color: #2a2a2a;
     color: #00a38f;
@@ -153,12 +136,45 @@ input {
     outline: none;
     transition: border-color 0.3s;
     box-sizing: border-box;
-
-
-    html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
 }
 
+/* 📱 Адаптивность */
+@media (max-width: 600px) {
+    #share-container {
+        padding: 20px;
+    }
 
+    #share-container h2 {
+        font-size: 22px;
+    }
+
+    #share-container p {
+        font-size: 13px;
+    }
+
+    .code-digit {
+        width: 45px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    #copy-close-btn,
+    .btn {
+        font-size: 13px;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 400px) {
+    .code-digit {
+        width: 38px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    #share-container h2 {
+        font-size: 20px;
+    }
+}
+.help-class{
+pointer-events: auto;}
