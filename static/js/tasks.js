@@ -127,7 +127,7 @@ function generatePopupContent(homeData, tasks) {
 
     return `
     <div class="popup-mobile" style="max-width: ${popupWidth}; max-height: ${popupHeight}; overflow-y: auto;">
-        <h4 style="margin-bottom: 5px;">${home_name}</h4>
+        <h4 style="margin-bottom: 5px; cursor: pointer;" onclick="copyDescription('${home_id} ${home_name} ${home_address}')">${home_name}</h4>
         <p style="margin-top: 0; color: #0078d4; cursor: pointer;"
            data-address="${home_address}"
            onclick="copyAddress(this.dataset.address)">

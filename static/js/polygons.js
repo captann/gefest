@@ -577,12 +577,26 @@ window.toggleDescription = function(taskId) {
     // Копируем taskId в буфер
     const desc = document.getElementById('desc-' + taskId);
         desc.style.display = desc.style.display === 'none' ? 'block' : 'none';
-    text = `ID скопирован`;
-    navigator.clipboard.writeText(taskId).then(() => {
-        showCopyNotification(text);
-    }).catch(() => {
-        showCopyNotification('❌ Не удалось скопировать ID', true);
-    });
+    if (desc.style.display == 'block'){
+        text = `ID скопирован`;
+        navigator.clipboard.writeText(taskId).then(() => {
+            showCopyNotification(text);
+        }).catch(() => {
+            showCopyNotification('❌ Не удалось скопировать ID', true);
+        });
+    }
+};
+
+
+window.copyDescription = function(description) {
+
+        text = `Описание скопировано`;
+        navigator.clipboard.writeText(description).then(() => {
+            showCopyNotification(text);
+        }).catch(() => {
+            showCopyNotification('❌ Не удалось скопировать ID', true);
+        });
+
 };
 
 function copyAddress(text) {
