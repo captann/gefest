@@ -409,7 +409,8 @@ def index():
                             "home_name": addr.home_name,
                             "home_address": addr.home_address,
                             "lon": addr.lon,
-                            "lat": addr.lat
+                            "lat": addr.lat,
+                            "stuff_id": addr.stuff_id
                         }
 
                 if home_id not in test_mode:
@@ -675,7 +676,8 @@ def control_panel():
                 'home_name': a.home_name,
                 'home_address': a.home_address,
                 'lat': a.lat,
-                'lon': a.lon
+                'lon': a.lon,
+                'stuff_id': a.stuff_id
             })
     tasks_done = [i.__dict__() for i in filter(lambda x: x.blank, tasks)]
     tasks_not = [i.__dict__() for i in filter(lambda x: not x.blank, tasks)]
@@ -1096,7 +1098,7 @@ def profile():
 def feed():
     return 'Здесь будет лента с полезными адресами'
 
-@app.route('/123', methods=["POST"])
+@app.route('/update_activation_number', methods=["POST"])
 def update_activation_number():
     data = request.get_json(force=True)  # принудительно парсим JSON
 
@@ -1152,8 +1154,59 @@ def update_activation_number():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/delete_address', methods=['POST'])
+def delete_address():
+    """
+    Удаляет запись адреса и все связанные с ней задачи из базы данных.
+    """
+    current_user = User.get_by_id(session.get('user_id'))
+    if current_user is None:
+        return redirect('/logout')
+
+    # Проверка прав доступа пользователя на основе его роли
+    if role_weights.get(current_user.role, -100) < 0:
+        return redirect('/logout')
+    if role_weights.get(current_user.role, -100) < 2:
+        return redirect('/')
+
+    data = request.get_json()
+    stuff_id = data.get('stuff_id')
+
+    if not stuff_id:
+        return jsonify({'success': False, 'message': 'stuff_id не был предоставлен'}), 400
+
+    try:
+        # Использование конструкции 'with' для управления сессией базы данных
+        with DBsession() as dbsession:
+            # Находим запись адреса по stuff_id
+            address_to_delete = dbsession.query(AddressModel).filter_by(stuff_id=stuff_id).first()
+
+            if address_to_delete:
+                # Получаем home_id из найденного адреса
+                home_id = address_to_delete.home_id
+
+                # Удаляем все задачи, связанные с этим home_id
+                # Мы предполагаем, что у модели TasksModel есть поле home_id
+                tasks_to_delete = dbsession.query(TaskModel).filter_by(home_id=home_id).all()
+                for task in tasks_to_delete:
+                    dbsession.delete(task)
+
+                # Затем удаляем сам адрес
+                dbsession.delete(address_to_delete)
+
+                # Фиксируем изменения в базе данных
+                dbsession.commit()
+                return jsonify({'success': True})
+            else:
+                return jsonify({'success': False, 'message': 'Адрес не найден'}), 404
+    except Exception as e:
+        # Обработка любых ошибок, которые могут возникнуть во время выполнения запроса
+        print(f"Ошибка при удалении адреса или задач: {e}")
+        dbsession.rollback()  # Откат сессии в случае ошибки
+        return jsonify({'success': False, 'message': 'Произошла ошибка сервера'}), 500
+
+
 if __name__ == '__main__':
     import os
     app.run(host='0.0.0.0', port=8080)
-
-

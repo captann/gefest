@@ -6,6 +6,8 @@ function createAddressForm(originalStr, fields = {}, isFullForm = false, isFromM
     div.style.background = '#2a2a2a';
     div.style.border = '1px solid #444';
     div.style.borderRadius = '10px';
+    div.setAttribute('stuff_id', fields.stuff_id);
+
 
     const title = document.createElement('p');
 
@@ -131,7 +133,7 @@ title.appendChild(link);
     mapWrapper.style.border = '1px solid #555';
     mapWrapper.style.borderRadius = '8px';
     mapWrapper.style.overflow = 'hidden';
-    mapWrapper.style.display = 'none'; // по умолчанию скрыта
+    mapWrapper.style.visibility = 'hidden'; // по умолчанию скрыта
 
     div.appendChild(mapWrapper);
 
@@ -142,95 +144,79 @@ title.appendChild(link);
     errorMsg.textContent = '❗ Невалидные координаты. Укажите в формате: 55.75, 37.61';
     div.appendChild(errorMsg);
 
-    setTimeout(() => {
-        const miniMap = L.map(mapId, {
-            attributionControl: false,
-            zoomControl: true
-        }).setView([55.75, 37.61], 10); // дефолтный центр
-        /* https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}*/
-        /* https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png */
-        L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(miniMap);
+    let miniMap = null;
+let currentMarker = null;
+let mapInitTimeout = null;
 
-        let currentMarker = null;
-        const latlonInput = inputRefs['latlon'];
+function initMapIfNeeded() {
+    if (miniMap) return; // карта уже есть — не создаём снова
 
-        function updateMarker(newLat, newLon) {
-            if (currentMarker) miniMap.removeLayer(currentMarker);
+    miniMap = L.map(mapId, {
+        attributionControl: false,
+        zoomControl: true
+    }).setView([55.75, 37.61], 10);
 
-            currentMarker = createMarker(miniMap, [newLon, newLat], fields, inputRefs);
+    L.tileLayer('https://tile2.maps.2gis.com/tiles?x={x}&y={y}&z={z}', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(miniMap);
 
+    requestAnimationFrame(() => miniMap.invalidateSize());
+}
 
-            miniMap.setView([newLat, newLon], 17);
-        }
+function updateMarker(newLat, newLon) {
+    if (!miniMap) initMapIfNeeded();
+    if (currentMarker) miniMap.removeLayer(currentMarker);
 
-        // при blur проверяем валидность
-        latlonInput.addEventListener('input', () => {
-    const allowed = "0123456789.,- ";
-    let val = latlonInput.value;
-    let filtered = '';
+    currentMarker = createMarker(miniMap, [newLon, newLat], fields, inputRefs);
+    miniMap.setView([newLat, newLon], 17);
+}
 
-    let dotCount = 0;
-    let commaCount = 0;
+const latlonInput = inputRefs['latlon'];
 
-    for (let ch of val) {
-        if (!allowed.includes(ch)) continue;
+latlonInput.addEventListener('blur', () => {
+    const [latStr, lonStr] = latlonInput.value.split(',').map(s => s.trim());
+    const lat = parseFloat(latStr);
+    const lon = parseFloat(lonStr);
+    const isValid = !isNaN(lat) && !isNaN(lon);
 
-        if (ch === '.') {
-            if (dotCount >= 2) continue;
-            dotCount++;
-        }
-
-        if (ch === ',') {
-            if (commaCount >= 1) continue;
-            commaCount++;
-        }
-
-        filtered += ch;
-    }
-
-    if (val !== filtered) {
-        const pos = latlonInput.selectionStart - 1;
-        latlonInput.value = filtered;
-        latlonInput.setSelectionRange(pos, pos);
+    if (isValid) {
+        fields.lat = lat;
+        fields.lon = lon;
+        errorMsg.style.display = 'none';
+        mapWrapper.style.visibility = 'visible';
+        updateMarker(lat, lon);
+    } else {
+        mapWrapper.style.visibility = 'hidden';
+        errorMsg.style.display = 'block';
     }
 });
 
-        latlonInput.addEventListener('blur', () => {
-            const [latStr, lonStr] = latlonInput.value.split(',').map(s => s.trim());
-            const lat = parseFloat(latStr);
-            const lon = parseFloat(lonStr);
-            const isValid = !isNaN(lat) && !isNaN(lon);
-
-            if (isValid) {
-                fields.lat = lat;
-                fields.lon = lon;
-                errorMsg.style.display = 'none';
-                mapWrapper.style.display = 'block';
-                requestAnimationFrame(() => {
-                    miniMap.invalidateSize();
-                    miniMap.setView([lat, lon], 17);
-                });
-                updateMarker(lat, lon);
-
+    // === 🔹 Автоматическая подгрузка карты при скролле ===
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // Элемент появился в зоне видимости → ждём 300мс
+                mapInitTimeout = setTimeout(() => {
+                    initMapIfNeeded();
+                    if (fields.lat && fields.lon) {
+                        mapWrapper.style.visibility = 'visible';
+                        updateMarker(fields.lat, fields.lon);
+                    }
+                }, 300);
             } else {
-                mapWrapper.style.display = 'none';
-                errorMsg.style.display = 'block';
+                // Если пользователь ушёл — отменяем загрузку карты
+                clearTimeout(mapInitTimeout);
             }
         });
+    }, {
+        root: null,        // наблюдаем за всей страницей
+        rootMargin: "0px",
+        threshold: 0.3     // минимум 30% карты в зоне видимости
+    });
 
-        // если изначально координаты валидные — отобразим карту
-        const [initialLat, initialLon] = [`${fields.lat}`, `${fields.lon}`];
-        if (!isNaN(parseFloat(initialLat)) && !isNaN(parseFloat(initialLon))) {
-            mapWrapper.style.display = 'block';
-            updateMarker(parseFloat(initialLat), parseFloat(initialLon));
-        }
+    // Начинаем следить за контейнером карты
+    observer.observe(mapWrapper);
 
-        requestAnimationFrame(() => {
-            miniMap.invalidateSize();
-        });
-    }, 0);
 
 
     if (user_role_weight > 1) {
@@ -243,6 +229,23 @@ title.appendChild(link);
             sendAddressUpdate(inputRefs, div, isFullForm, isFromMainList, isFullForm);
         });
         div.appendChild(submitBtn);
+
+        const delBtn = document.createElement('button');
+        delBtn.textContent = "Удалить";
+
+        delBtn.type="button";
+        delBtn.style.marginTop = '10px';
+        delBtn.style.background = '#dc3545';
+        delBtn.style.marginLeft = '10px';
+        delBtn.style.color = 'white';
+        delBtn.addEventListener('click', () => {
+            confirmRemoving(fields.stuff_id, div);
+        });
+
+        submitBtn.addEventListener('click', () => {
+            sendAddressUpdate(inputRefs, div, isFullForm, isFromMainList, isFullForm);
+        });
+        div.appendChild(delBtn);
     }
 
 

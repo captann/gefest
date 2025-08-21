@@ -9,7 +9,7 @@ async function updateActivationNumber() {
     }
 
     try {
-        const response = await fetch('/123', {
+        const response = await fetch('/update_activation_number', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -334,6 +334,7 @@ class Address:
                     self.lon = info["lon"]
                     self.lat = info["lat"]
                     self.is_valid = info["is_valid"]
+                    self.stuff_id = info["stuff_id"]
         elif kwargs.get("home_id", False):
             self.is_valid = Address.is_exist(kwargs.get("home_id", False))
             if not self.is_valid:
@@ -342,6 +343,7 @@ class Address:
                 r = self.get_by_id(kwargs.get("home_id", -1))
                 self.is_valid = r["is_valid"]
                 self.home_id = r["home_id"]
+                self.stuff_id = r["stuff_id"]
                 self.home_name = r["home_name"]
                 self.home_address = r["home_address"]
                 self.lon = r["lon"]
@@ -366,7 +368,8 @@ class Address:
                 "home_name": record.home_name,
                 "home_address": record.home_address,
                 "lon": record.lon,
-                "lat": record.lat
+                "lat": record.lat,
+                "stuff_id": record.stuff_id
             }
         else:
             return {"is_valid": False}

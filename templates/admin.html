@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/back.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/warn_banner.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/for_upload_type.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/modal_window.css') }}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
     <style>
@@ -516,6 +517,26 @@
 </div>
 
 
+<!-- Модальное окно -->
+<div id="confirmationModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+        <h2 class="modal-title">Подтвердите удаление</h2>
+        <p class="modal-text">
+            Вы уверены, что хотите удалить этот адрес?
+            Вместе с адресом будут удалены все задачи, связанные с ним.
+        </p>
+
+        <!-- Новый блок для таймера -->
+        <p id="countdownText" class="countdown-text hidden">Удаление станет доступно через 5 секунд</p>
+
+        <div class="modal-actions">
+            <button id="cancelButton" class="btn-cancel">Отмена</button>
+            <button id="confirmDeleteButton" class="btn-delete">Да, удалить</button>
+        </div>
+    </div>
+</div>
+
 
 <script>
 const users = {{ users | tojson }};
@@ -534,6 +555,8 @@ const user_role_weight = {{ user_role_weight }};
 {% endif %}
 <script src="{{ url_for('static', filename='js/admin_address.js') }}"></script>
 <script src="{{ url_for('static', filename='js/update_address.js') }}"></script>
+<script src="{{ url_for('static', filename='js/delete_address.js') }}"></script>
+
 {% if user_role_weight > 1 %}
 <script src="{{ url_for('static', filename='js/admin_switcher.js') }}"></script>
 {% endif %}

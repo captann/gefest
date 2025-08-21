@@ -61,3 +61,50 @@ function sendAddressUpdate(inputRefs, formDiv, isFromMainList = false) {
         setTimeout(() => error.remove(), 3000);
     });
 }
+
+
+function sendAddressDelete(stuff_id, formDiv) {
+
+    const data = {"stuff_id": stuff_id};
+
+    fetch('/delete_address', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+    .then(res => res.json())
+    .then(result => {
+            closeModal();
+
+        if (result.success)  {
+                const msg = document.createElement('p');
+                msg.textContent = "✅ Удалено";
+                msg.style.color = 'lightgreen';
+                msg.style.textAlign = 'center';
+                formDiv.innerHTML = '';
+                formDiv.appendChild(msg);
+                formDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => {
+                    formDiv.remove();
+                     // ← логика для возврата загрузочной формы
+                }, 3000);
+
+        } else {
+            const error = document.createElement('span');
+            error.className = 'update-status';
+            error.textContent = `❌ ${result.message || 'Ошибка'}`;
+            error.style.color = 'red';
+            formDiv.appendChild(error);
+            setTimeout(() => error.remove(), 3000);
+        }
+
+    })
+    .catch(() => {
+        const error = document.createElement('span');
+        error.className = 'update-status';
+        error.textContent = '❌ Не удалось отправить данные';
+        error.style.color = 'red';
+        formDiv.appendChild(error);
+        setTimeout(() => error.remove(), 3000);
+    });
+}

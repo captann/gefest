@@ -6,9 +6,8 @@ Base = declarative_base()
 
 class AddressModel(Base):
     __tablename__ = 'addresses'
-
-    home_id = Column(String(30), primary_key=True)
-
+    stuff_id = Column(Integer, primary_key=True, autoincrement=True)
+    home_id = Column(String(30),  unique=True)
     home_name = Column(Text, nullable=False)
     home_address = Column(Text, nullable=False)
     lon = Column(Float, nullable=False)
@@ -72,9 +71,9 @@ class PolygonModel(Base):
 class SharedPolygonModel(Base):
     __tablename__ = 'shared_polygons'
 
-    polygon_id = Column(Integer, ForeignKey('polygons.polygon_id'), primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
-    hash = Column(Text, unique=True)
+    polygon_id = Column(Integer, ForeignKey('polygons.polygon_id'))
+    user_id = Column(Integer, ForeignKey('users.user_id'))
+    hash = Column(Text, unique=True, primary_key=True)
     confirm_code = Column(Integer)
     used = Column(Integer)
     number_of_using = Column(Integer)

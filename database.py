@@ -3,14 +3,15 @@ from sqlalchemy.orm import sessionmaker
 from models import Base  # импорт моделей (Address, Task и т.д.)
 from app_config import DB_FILE
 
-# Пример подключения к SQLite
-DATABASE_URL = f"sqlite:///{DB_FILE}"
+def create_db():
+    # Пример подключения к SQLite
+    DATABASE_URL = f"sqlite:///{DB_FILE}"
 
-# Или PostgreSQL (замени значениями)
-# DATABASE_URL = "postgresql://user:password@host:port/dbname"
+    # Или PostgreSQL (замени значениями)
+    # DATABASE_URL = "postgresql://user:password@host:port/dbname"
 
-engine = create_engine(DATABASE_URL, echo=True)
-Session = sessionmaker(bind=engine)
+    engine = create_engine(DATABASE_URL, echo=True)
+    Session = sessionmaker(bind=engine)
 
-# Создаёт таблицы при необходимости (например, при работе с новой БД)
-Base.metadata.create_all(engine)
+    # Создаёт таблицы при необходимости (например, при работе с новой БД)
+    Base.metadata.create_all(engine)
