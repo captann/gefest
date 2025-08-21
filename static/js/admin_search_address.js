@@ -22,7 +22,7 @@ window.addEventListener('DOMContentLoaded', () => {
         const query = searchInput.value.toLowerCase().trim();
         let c = 0;
         allForms.forEach(wrapper => {
-            const text = wrapper.dataset.search;
+            const text = wrapper.dataset.search.toLowerCase();
             if (text.includes(query.toLowerCase())) {
                 wrapper.style.removeProperty('display');
             } else {

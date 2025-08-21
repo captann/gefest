@@ -1,6 +1,6 @@
 const normalize = s => s?.trim().replace(/\s+/g, ' ');
 
-document.addEventListener('DOMContentLoaded', function () {
+function filtring() {
     let searchInput = document.getElementById('search-input');
     let searchType = document.getElementById('search-type');
 
@@ -123,4 +123,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-});
+}
+document.addEventListener('DOMContentLoaded', filtring);
