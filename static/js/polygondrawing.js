@@ -13,6 +13,7 @@ function initPolygonDrawing() {
          if (element) {
             element.setAttribute('hidden', true);
          }
+         document.getElementById("area-title").setAttribute('hidden', true);
          document.querySelector('.mode-switcher').style.display = 'none';
         if (document.getElementById('area-search')) {
         document.getElementById('area-search').style.display = 'none';
@@ -268,6 +269,7 @@ newButton.addEventListener('click', function () {
 
    document.getElementById('cancel-area-btn').addEventListener('click', function () {
     // Убираем нарисованный полигон с карты, если он есть
+    document.getElementById('area-title').removeAttribute('hidden');
     if (document.getElementById('add-area-btn')) {
         document.getElementById('add-area-btn').removeAttribute('hidden');
     }

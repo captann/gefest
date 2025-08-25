@@ -2,14 +2,14 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Управление заявками и ролями</title>
+    <title>Панель инструментов</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mode_switcher.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/back.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/warn_banner.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/for_upload_type.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modal_window.css') }}">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 
     <style>
         .checkbox-cell {
@@ -498,10 +498,11 @@
             </div>
         </div>
     </div>
-    <a href="/" class="floating-button" title="На главную">
-        🏠
+    <a href="/" class="floating-button" title="{{home_button.get('title')}}" id="rocketButton">
+        {{home_button.get('icon')}}
     </a>
-    <div class="floating-nav">
+    <div class="floating-nav" id="floatingNav">
+        <div class="nav-toggle" id="navToggle">⮟</div>
         {% if user_role_weight > 1 %}
         <a href="#upload-section"><span class="icon">📥</span><span class="label">Загрузка</span></a>
         {% endif %}
@@ -537,7 +538,9 @@
     </div>
 </div>
 
-
+<script>
+    const icon = "{{home_button.get('icon')}}";
+</script>
 <script>
 const users = {{ users | tojson }};
 const tasks_not = {{ tasks_not | tojson }};
@@ -571,7 +574,7 @@ const user_role_weight = {{ user_role_weight }};
 {% if user_role_weight > 1 %}
 <script src="{{ url_for('static', filename='js/for_upload_type.js') }}"></script>
 {% endif %}
-
+<script src="{{ url_for('static', filename='js/back_menu_worker.js') }}"></script>
 <!--<script>hideLoading();</script> -->
 </body>
 </html>

@@ -700,7 +700,9 @@ def control_panel():
         user_role_weight=user_role_weight,
         settings=settings,  # 👈 вот это ключевое!
         role_names=role_names,
-        role_icons=role_icons
+        role_icons=role_icons,
+        home_button = {"icon": "🏠",
+                       "title": "На главную"}
     )
 
 @app.route('/update_role', methods=['POST'])
@@ -1082,7 +1084,14 @@ def download_db():
 
 @app.route('/about')
 def about():
-    return render_template('about.html')
+    return render_template('about.html',
+                           home_button={"icon": "🚀",
+                                        "title": "Вперёд!"},
+
+                           role_names=role_names,
+                           role_icons=role_icons,
+                           role_weights=role_weights
+                           )
 
 @app.route('/profile')
 @login_required

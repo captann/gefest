@@ -93,4 +93,19 @@ class SettingsModel(Base):
     user = relationship("UserModel", backref="settings")
 
 
+"""class ActualTaskModel(TaskModel):
+    __tablename__ = 'actual_tasks'
+
+    task_id = Column(Integer, primary_key=True)
+    date = Column(Text, nullable=False)
+    home_id = Column(String(30), ForeignKey('addresses.home_id'), nullable=False)
+    problem = Column(Text, nullable=False)
+    solution = Column(Text)
+    blank = Column(Boolean, default=False)
+    archieved = Column(Boolean, default=False)  # уже было
+    is_ppr = Column(Boolean, default=False)
+
+    # Обратная связь: задача → адрес
+    address = relationship("AddressModel", back_populates="tasks")
+"""
 
