@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
   function setState(open) {
     menuOpen = open;
     nav.classList.toggle("is-collapsed", !open);
-    rocket.textContent = open ? icon : "⮝";
+    rocket.textContent = open ? icon : "🠕";
     rocket.style.color = "white";
     rocket.title = open ? "Вперёд!" : "Открыть меню";
     rocket.setAttribute("aria-expanded", String(open));
@@ -27,11 +27,11 @@ document.addEventListener("DOMContentLoaded", function () {
     // Иконка navToggle зависит от режима
     if (isAttachedBottom) {
       // Внизу страницы toggle играет роль ракеты
-      toggle.textContent = open ? icon : "⮝";
+      toggle.textContent = open ? icon : "🠕";
       toggle.title = open ? "Вперёд!" : "Открыть меню";
     } else {
       // В "плавающем" режиме toggle — кнопка сворачивания/разворачивания
-      toggle.textContent = open ? "⮟" : "⮝";
+      toggle.textContent = open ? "🠗" : "🠕";
       toggle.title = open ? "Свернуть меню" : "Развернуть меню";
     }
   }
