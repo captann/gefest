@@ -85,7 +85,34 @@ a:hover {
 }
 
 
-a.floating-button:hover, button:hover {
-    background-color: #56b6c2;
-    transform: scale(1.05);
+
+.table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-top: 20px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border: 1px solid #4b5263; /* Я сделал границы более контрастными */
+    padding: 12px;
+    text-align: left;
+    background-color: #424957;
+}
+
+th {
+    background-color: #528b9d;
+    color: white;
+    font-weight: bold;
+}
+
+tr:nth-child(even) td {
+    background-color: #4b5263;
 }
