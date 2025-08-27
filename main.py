@@ -866,7 +866,7 @@ def from_link():
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
+                               'compass.png', mimetype='image/vnd.microsoft.icon')
 
 
 
@@ -1082,8 +1082,8 @@ def download_db():
     # Отправляем файл напрямую
     return send_file(db_path, as_attachment=True)
 
-@app.route('/about')
-def about():
+@app.route('/about2')
+def about2():
     return render_template('about.html',
                            home_button={"icon": "🚀",
                                         "title": "Вперёд!"},
@@ -1093,6 +1093,16 @@ def about():
                            role_weights=role_weights
                            )
 
+@app.route('/about')
+def about():
+    return render_template('about_2.html',
+                           home_button={"icon": "🚀",
+                                        "title": "Вперёд!"},
+
+                           role_names=role_names,
+                           role_icons=role_icons,
+                           role_weights=role_weights
+                           )
 @app.route('/profile')
 @login_required
 def profile():
