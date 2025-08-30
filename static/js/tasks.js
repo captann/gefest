@@ -186,7 +186,156 @@ function generatePopupContent(homeData, tasks) {
 let homesList = document.getElementById("homes-list");
 let sorted = sort_homes(homes, tasks);
 
-for (let homeId of sorted) {
+
+function getTaskCountString(homeId, tasks) {
+    if (!tasks[homeId]) return "";
+
+    const count = tasks[homeId].filter(task => task.blank === 0).length;
+    if (count === 0) return "";
+
+    const suffix = (count % 10 === 1 && count % 100 !== 11) ? "задача"
+        : (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) ? "задачи"
+        : "задач";
+
+    return `${count} ${suffix}`;
+}
+
+function sort_homes(homes, tasks) {
+    let homeTaskCounts = Object.keys(homes).map(homeId => {
+        // Считаем только задачи, где blank === 0
+        let count = tasks[homeId]
+            ? tasks[homeId].filter(task => task.blank === 0).length
+            : 0;
+
+        let address = homes[homeId].address || "";
+        return { homeId, count, address };
+    });
+
+    // Сортировка: по убыванию количества незавершённых задач, потом по адресу
+    homeTaskCounts.sort((a, b) => {
+        if (b.count !== a.count) {
+            return b.count - a.count;
+        } else {
+            return a.address.localeCompare(b.address);
+        }
+    });
+
+    return homeTaskCounts.map(entry => Number(entry.homeId));
+}
+function hideMarkers() {
+    allMarkers.forEach(marker => {
+        marker.remove();
+    });
+}
+
+function showSeveralMarkers(holdingName, status) {
+    const map = find_map();
+    if (!holdingsDict[holdingName]){
+        for (const holdingName in holdingsDict) {
+            for (const home_id of holdingsDict[holdingName]) {
+                const marker = markers[home_id];
+                if (!(status === 'ALL')) {
+                    if (marker && (homes[home_id].status == status)) {
+                        marker.addTo(map);
+                    }
+                } else {
+                if (marker) {
+                        marker.addTo(map);
+                    }
+                }
+            }
+        }
+    } else {
+    for (const home_id of holdingsDict[holdingName]) {
+        const marker = markers[home_id];
+        if (!(status === 'ALL')) {
+            if (marker && (homes[home_id].status == status)) {
+                marker.addTo(map);
+            }}
+        else {
+        if (marker) {
+                marker.addTo(map);
+            }
+        }
+    }
+    }
+}
+
+
+function showMarkers() {
+    const map = find_map();
+    let home = null;
+    let mark = null;
+
+    // Словарь: холдинг → список home_id
+
+    for (let home_id in homes) {
+        home = homes[home_id];
+        const holdingName = home.home_name;
+        if (typeof  tasks[home_id] !== "undefined" ) {
+        if (tasks[home_id].length > 0) {
+            // Добавляем в словарь
+            if (holdingName) {
+                if (!holdingsDict[holdingName]) {
+                    holdingsDict[holdingName] = [];
+                }
+                holdingsDict[holdingName].push(home_id);
+            }
+
+            // Создание маркера
+
+            mark = createMarker(
+                map,
+                [home.lon, home.lat],
+                {
+                    home_id: home.home_id,
+                    home_name: home.home_name,
+                    home_address: home.home_address,
+                    status: home.status,
+                    markerRoundColor: houses_colors[home_id][0],
+                    markerCenterColor: houses_colors[home_id][1]
+                },
+                tasks[home_id]
+            );
+
+            markers[home_id] = mark;
+        }
+        }
+    }
+
+    // Словарь: холдинг → кол-во невыполненных задач
+    const holdingsTaskCounts = {};
+
+    for (let holding in holdingsDict) {
+        let count = 0;
+
+        for (let home_id of holdingsDict[holding]) {
+            const taskList = tasks[home_id] || [];
+            for (let task of taskList) {
+                if (!task.blank) {
+                    count++;
+                }
+            }
+        }
+
+        holdingsTaskCounts[holding] = count;
+    }
+
+    // Преобразуем в массив [holding, count]
+    let holdingsArray = Object.entries(holdingsTaskCounts);
+    // Сортировка: сначала по убыванию количества задач, потом по алфавиту
+    holdingsArray.sort((a, b) => {
+        if (b[1] !== a[1]) {
+            return b[1] - a[1]; // по количеству задач
+        }
+        return a[0].localeCompare(b[0]); // по алфавиту
+    });
+
+    // Формируем окончательный список холдингов
+    holdings = holdingsArray.map(entry => entry[0]);
+    let flag = false;
+    for (let homeId of sorted) {
+    flag = false;
     let li = document.createElement("li");
     // Кнопка с адресом
     let toggleButton = document.createElement("div");
@@ -352,158 +501,18 @@ for (let homeId of sorted) {
         });
         taskContainer.style.display = taskContainer.style.display === "none" ? "block" : "none";
     });
-
-    li.appendChild(toggleButton);
-    li.appendChild(taskContainer);
-    homesList.appendChild(li);
-}
-
-function getTaskCountString(homeId, tasks) {
-    if (!tasks[homeId]) return "";
-
-    const count = tasks[homeId].filter(task => task.blank === 0).length;
-    if (count === 0) return "";
-
-    const suffix = (count % 10 === 1 && count % 100 !== 11) ? "задача"
-        : (count % 10 >= 2 && count % 10 <= 4 && (count % 100 < 10 || count % 100 >= 20)) ? "задачи"
-        : "задач";
-
-    return `${count} ${suffix}`;
-}
-
-function sort_homes(homes, tasks) {
-    let homeTaskCounts = Object.keys(homes).map(homeId => {
-        // Считаем только задачи, где blank === 0
-        let count = tasks[homeId]
-            ? tasks[homeId].filter(task => task.blank === 0).length
-            : 0;
-
-        let address = homes[homeId].address || "";
-        return { homeId, count, address };
-    });
-
-    // Сортировка: по убыванию количества незавершённых задач, потом по адресу
-    homeTaskCounts.sort((a, b) => {
-        if (b.count !== a.count) {
-            return b.count - a.count;
-        } else {
-            return a.address.localeCompare(b.address);
-        }
-    });
-
-    return homeTaskCounts.map(entry => Number(entry.homeId));
-}
-function hideMarkers() {
-    allMarkers.forEach(marker => {
-        marker.remove();
-    });
-}
-
-function showSeveralMarkers(holdingName, status) {
-    const map = find_map();
-    if (!holdingsDict[holdingName]){
-        for (const holdingName in holdingsDict) {
-            for (const home_id of holdingsDict[holdingName]) {
-                const marker = markers[home_id];
-                if (!(status === 'ALL')) {
-                    if (marker && (homes[home_id].status == status)) {
-                        marker.addTo(map);
-                    }
-                } else {
-                if (marker) {
-                        marker.addTo(map);
-                    }
-                }
-            }
-        }
-    } else {
-    for (const home_id of holdingsDict[holdingName]) {
-        const marker = markers[home_id];
-        if (!(status === 'ALL')) {
-            if (marker && (homes[home_id].status == status)) {
-                marker.addTo(map);
-            }}
-        else {
-        if (marker) {
-                marker.addTo(map);
-            }
-        }
+    // homes[homeId]['home_name']
+    holdings.forEach(holding => {
+    if (holding == homes[homeId]['home_name']) {
+        flag = true;
     }
+    });
+    if (flag) {
+        li.appendChild(toggleButton);
+        li.appendChild(taskContainer);
+        homesList.appendChild(li);
     }
 }
-
-
-function showMarkers() {
-    const map = find_map();
-    let home = null;
-    let mark = null;
-
-    // Словарь: холдинг → список home_id
-
-    for (let home_id in homes) {
-        home = homes[home_id];
-        const holdingName = home.home_name;
-        if (typeof  tasks[home_id] !== "undefined" ) {
-        if (tasks[home_id].length > 0) {
-            // Добавляем в словарь
-            if (holdingName) {
-                if (!holdingsDict[holdingName]) {
-                    holdingsDict[holdingName] = [];
-                }
-                holdingsDict[holdingName].push(home_id);
-            }
-
-            // Создание маркера
-
-            mark = createMarker(
-                map,
-                [home.lon, home.lat],
-                {
-                    home_id: home.home_id,
-                    home_name: home.home_name,
-                    home_address: home.home_address,
-                    status: home.status,
-                    markerRoundColor: houses_colors[home_id][0],
-                    markerCenterColor: houses_colors[home_id][1]
-                },
-                tasks[home_id]
-            );
-
-            markers[home_id] = mark;
-        }
-        }
-    }
-
-    // Словарь: холдинг → кол-во невыполненных задач
-    const holdingsTaskCounts = {};
-
-    for (let holding in holdingsDict) {
-        let count = 0;
-
-        for (let home_id of holdingsDict[holding]) {
-            const taskList = tasks[home_id] || [];
-            for (let task of taskList) {
-                if (!task.blank) {
-                    count++;
-                }
-            }
-        }
-
-        holdingsTaskCounts[holding] = count;
-    }
-
-    // Преобразуем в массив [holding, count]
-    let holdingsArray = Object.entries(holdingsTaskCounts);
-    // Сортировка: сначала по убыванию количества задач, потом по алфавиту
-    holdingsArray.sort((a, b) => {
-        if (b[1] !== a[1]) {
-            return b[1] - a[1]; // по количеству задач
-        }
-        return a[0].localeCompare(b[0]); // по алфавиту
-    });
-
-    // Формируем окончательный список холдингов
-    holdings = holdingsArray.map(entry => entry[0]);
 
     // Обновляем выпадающий список
     updateHoldingFilter();
@@ -580,9 +589,7 @@ document.addEventListener('change', function (e) {
             // Обновляем маркер
             const prev_color = houses_colors[data.home_id];
             houses_colors[data.home_id] = data.color;
-            console.log('current: ', houses_colors[data.home_id]);
-             console.log('prev: ', prev_color);
-             console.log('---');
+
 
             const marker = markers[data.home_id];
             const markerHtml = `
