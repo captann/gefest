@@ -77,12 +77,23 @@
 
                     <div class="search-select-group">
                         <select id="search-type" class="search-select">
-                            <option value="id">По ID задачи</option>
                             <option value="address">По адресу</option>
+                            <option value="id">По ID </option>
+
                         </select>
 
                         <select id="holding-filter" class="search-select">
                             <option value="all">Все холдинги</option>
+                        </select>
+                        <select id="address_type" class="search-select">
+                            <option value="ALL">Все объекты</option>
+                            <option value="PS">Печать, подпись</option>
+
+
+                            <option value="PNS">Печать</option>
+                            <option value="NPS">Подпись</option>
+
+
                         </select>
                     </div>
                     <p id="generate-report-link" class="link-only">Отчёт по холдингам</p>
@@ -185,7 +196,7 @@
     <script src="{{ url_for('static', filename='js/change_map_type.js') }}"></script>
     <script src="{{ url_for('static', filename='js/geolocation.js') }}"></script>
     <script src="{{ url_for('static', filename='js/save_select.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/submit_whole_holding.js') }}"></script>
 
 
 </body>

@@ -3,8 +3,10 @@ function sendAddressUpdate(inputRefs, formDiv, isFromMainList = false) {
     const home_name = inputRefs['home_name'].value.trim();
     const address = inputRefs['home_address'].value.trim();
     const lonlat = inputRefs['latlon'].value.trim();
+    const print  = inputRefs['print'].checked;
+    const sign = inputRefs['sign'].checked;
 
-    const data = { home_id, home_name, address, lonlat };
+    const data = { home_id, home_name, address, lonlat, print, sign };
 
     fetch('/submit_address', {
         method: 'POST',

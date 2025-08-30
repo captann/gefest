@@ -44,16 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function createMarker(map, coords, homeData, tasks) {
-    const { home_id, markerColor } = homeData;
-
+    const { home_id, status,  markerRoundColor, markerCenterColor } = homeData;
     const popupContent = generatePopupContent(homeData, tasks);
 
     const markerHtml = `
         <div id="marker-${home_id}" style="
             width: 28px;
             height: 28px;
-            background-color: ${markerColor};
-            border: 2px solid black;
+            background-color: ${markerRoundColor};
             border-radius: 50% 50% 50% 0;
             transform: rotate(-45deg);
             position: relative;
@@ -67,12 +65,19 @@ function createMarker(map, coords, homeData, tasks) {
         onmouseout="this.style.transform='rotate(-45deg) scale(1)'; this.style.boxShadow='0 0 6px rgba(0,0,0,0.3)';"
         >
             <div style="
-                width: 10px;
-                height: 10px;
-                background-color: white;
-                border-radius: 50%;
-                transform: rotate(45deg);
-            "></div>
+                width: 20px;
+            height: 20px;
+            background-color: ${markerCenterColor};
+            border-radius: 50% 50% 50% 0;
+            position: relative;
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            "
+        onmouseover="this.style.transform='rotate(0deg)'; this.style.background='white';"
+        onmouseout="this.style.transform='rotate(0deg) scale(1)'; this.style.background='${markerCenterColor}';"></div>
         </div>
     `;
 
@@ -89,41 +94,47 @@ function createMarker(map, coords, homeData, tasks) {
     return marker;
 }
 function generatePopupContent(homeData, tasks) {
-    const { home_id, home_name, home_address } = homeData;
+    const { home_id, home_name, home_address, status } = homeData;
     const isMobile = window.innerWidth < 1000; // Мобильные устройства
 
   const popupWidth = isMobile ? "250px" : "500px";
   const popupHeight = isMobile ? "350px" : "700px";
   const maxLength = isMobile ? 8 : 14;
-  const tasksHtml = tasks.map(task => {
-    const checked = task.blank === 1 ? "checked" : "";
+  let tasksHtml = "";
+      if (typeof tasks !== "undefined") {
+       tasksHtml = tasks.map(task => {
+        const checked = task.blank === 1 ? "checked" : "";
 
-    return `
-    <div class='task-item-2' style='margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;'
-         data-task-id="${task.task_id}" home_id="${home_id}">
-        <div style='display: flex; justify-content: space-between; align-items: center;'>
-            <button onclick='toggleDescription(${task.task_id})'
-                    style='border: none; background: none; cursor: pointer; text-align: left; flex-grow: 1;'>
-                <b>#${formatTaskId(task.task_id, maxLength)}</b> - ${task.date}
-            </button>
-            ${user_role_weight > 0 ? `
-            <label style='display: flex; align-items: center; white-space: nowrap; margin-left: 10px;'>
-                <input type='checkbox' id='act-checkbox-${task.task_id}'
-                       style='margin-right: 5px;'
-                       replace_me_id='${task.task_id}'
-                       onclick='event.stopPropagation()'
-                       data-task-id='${task.task_id}' ${checked}>
-                Акт готов
-            </label>
-            ` : ''}
+        return `
+        <div class='task-item-2' style='margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee;'
+             data-task-id="${task.task_id}" home_id="${home_id}">
+            <div style='display: flex; justify-content: space-between; align-items: center;'>
+                <button onclick='toggleDescription(${task.task_id})'
+                        style='border: none; background: none; cursor: pointer; text-align: left; flex-grow: 1;'>
+                    <b>#${formatTaskId(task.task_id, maxLength)}</b> - ${task.date}
+                </button>
+                ${user_role_weight > 0 ? `
+                <label style='display: flex; align-items: center; white-space: nowrap; margin-left: 10px;'>
+                    <input type='checkbox' id='act-checkbox-${task.task_id}'
+                           style='margin-right: 5px;'
+                           replace_me_id='${task.task_id}'
+                           onclick='event.stopPropagation()'
+                           data-task-id='${task.task_id}' ${checked}>
+                    Акт готов
+                </label>
+                ` : ''}
+            </div>
+            <div id='desc-${task.task_id}' style='display: none; margin-top: 10px; padding-left: 10px;font-size:18px;'>
+                <p><b>Проблема:</b> ${task.problem}</p>
+                <p><b>Решение:</b> ${task.solution}</p>
+            </div>
         </div>
-        <div id='desc-${task.task_id}' style='display: none; margin-top: 10px; padding-left: 10px;font-size:18px;'>
-            <p><b>Проблема:</b> ${task.problem}</p>
-            <p><b>Решение:</b> ${task.solution}</p>
-        </div>
-    </div>
-    `;
-}).join("");
+        `;
+    }).join("");
+    } else {
+
+    }
+    if (status === 'NPNS') {
 
     return `
     <div class="popup-mobile" style="max-width: ${popupWidth}; max-height: ${popupHeight}; overflow-y: auto;">
@@ -141,6 +152,35 @@ function generatePopupContent(homeData, tasks) {
         </div>
     </div>
 `;
+} else {
+
+    return `
+    <div class="popup-mobile" style="max-width: ${popupWidth}; max-height: ${popupHeight}; overflow-y: auto;">
+        <h4 style="margin-bottom: 5px; cursor: pointer;"
+            onclick='copyDescription(${JSON.stringify(`${home_id} ${home_name} ${home_address}`)})'>
+            ${home_name}
+        </h4>
+
+        <p style="margin-top: 0; color: #0078d4; cursor: pointer;"
+           data-address="${home_address}"
+           onclick="copyAddress(this.dataset.address)">
+          ${home_address}
+        </p>
+
+        <button onclick='submit_whole_holding(${JSON.stringify(home_name)})'>
+            Отметить холдинг
+        </button>
+
+        <hr style="margin: 10px 0;">
+        <h5 style="margin-bottom: 10px;">Заявки:</h5>
+        <div id="tasks-container">
+            ${tasksHtml}
+        </div>
+    </div>
+`;
+
+
+}
 }
 
 let homesList = document.getElementById("homes-list");
@@ -148,27 +188,96 @@ let sorted = sort_homes(homes, tasks);
 
 for (let homeId of sorted) {
     let li = document.createElement("li");
-
     // Кнопка с адресом
     let toggleButton = document.createElement("div");
 
     let home = homes[homeId];
     let taskInfo = getTaskCountString(homeId, tasks);
-    toggleButton.innerHTML = `
-        <div style="display: flex; flex-direction: column; align-items: flex-start;">
-            <span style="font-weight: 600; font-size: 16px; color: #fff;">
-                ${home.home_address || "Без названия"}
-            </span>
-            <span style="font-size: 14px; color: #0078d4; margin-top: 2px;">
-                ${homes[homeId].home_name}
-            </span>
-            ${taskInfo ? `
-                <span class="uncompleted-info" style="margin-top: 6px; font-size: 12px; color: #dc3545;">
-                    (${taskInfo})
-                </span>` : ''
-            }
-        </div>
-    `;
+    if (homes[homeId].status === "NPNS") {
+        toggleButton.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span style="font-weight: 600; font-size: 16px; color: #fff;">
+                    ${home.home_address || "Без названия"}
+                </span>
+                <span style="font-size: 14px; color: #0078d4; margin-top: 2px;">
+                    ${homes[homeId].home_name}
+                </span>
+
+                ${taskInfo ? `
+                    <span class="uncompleted-info" style="margin-top: 6px; font-size: 12px; color: #dc3545;">
+                        (${taskInfo})
+                    </span>` : ''
+                }
+            </div>
+        `;
+
+        };
+         if (homes[homeId].status === "PNS") {
+        toggleButton.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span style="font-weight: 600; font-size: 16px; color: #fff;">
+                    ${home.home_address || "Без названия"}
+                </span>
+                <span style="font-size: 14px; color: #0078d4; margin-top: 2px;">
+                    ${homes[homeId].home_name}
+                </span>
+                <span style="font-size: 14px; color: #00ff00; margin-top: 2px;">
+                    Есть печать
+                </span>
+
+                ${taskInfo ? `
+                    <span class="uncompleted-info" style="margin-top: 6px; font-size: 12px; color: #dc3545;">
+                        (${taskInfo})
+                    </span>` : ''
+                }
+            </div>
+        `;
+
+        };
+         if (homes[homeId].status === "NPS") {
+        toggleButton.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span style="font-weight: 600; font-size: 16px; color: #fff;">
+                    ${home.home_address || "Без названия"}
+                </span>
+                <span style="font-size: 14px; color: #0078d4; margin-top: 2px;">
+                    ${homes[homeId].home_name}
+                </span>
+                <span style="font-size: 14px; color: #00ff00; margin-top: 2px;">
+                    Есть подпись
+                </span>
+
+                ${taskInfo ? `
+                    <span class="uncompleted-info" style="margin-top: 6px; font-size: 12px; color: #dc3545;">
+                        (${taskInfo})
+                    </span>` : ''
+                }
+            </div>
+        `;
+
+        };
+         if (homes[homeId].status === "PS") {
+        toggleButton.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: flex-start;">
+                <span style="font-weight: 600; font-size: 16px; color: #fff;">
+                    ${home.home_address || "Без названия"}
+                </span>
+                <span style="font-size: 14px; color: #0078d4; margin-top: 2px;">
+                    ${homes[homeId].home_name}
+                </span>
+                <span style="font-size: 14px; color: #00ff00; margin-top: 2px;">
+                    Есть печать и подпись
+                </span>
+
+                ${taskInfo ? `
+                    <span class="uncompleted-info" style="margin-top: 6px; font-size: 12px; color: #dc3545;">
+                        (${taskInfo})
+                    </span>` : ''
+                }
+            </div>
+        `;
+
+        };
 
 
     toggleButton.style.cursor = "pointer";
@@ -177,6 +286,7 @@ for (let homeId of sorted) {
     toggleButton.style.borderBottom="1px solid #444";
     toggleButton.setAttribute("data-home-id", homeId);
     toggleButton.setAttribute("holding", homes[homeId].home_name)
+    toggleButton.setAttribute("status", homes[homeId].status)
 
 
     // Контейнер задач
@@ -289,15 +399,36 @@ function hideMarkers() {
     });
 }
 
-function showSeveralMarkers(holdingName) {
+function showSeveralMarkers(holdingName, status) {
     const map = find_map();
-    if (!holdingsDict[holdingName]) return;
-
+    if (!holdingsDict[holdingName]){
+        for (const holdingName in holdingsDict) {
+            for (const home_id of holdingsDict[holdingName]) {
+                const marker = markers[home_id];
+                if (!(status === 'ALL')) {
+                    if (marker && (homes[home_id].status == status)) {
+                        marker.addTo(map);
+                    }
+                } else {
+                if (marker) {
+                        marker.addTo(map);
+                    }
+                }
+            }
+        }
+    } else {
     for (const home_id of holdingsDict[holdingName]) {
         const marker = markers[home_id];
+        if (!(status === 'ALL')) {
+            if (marker && (homes[home_id].status == status)) {
+                marker.addTo(map);
+            }}
+        else {
         if (marker) {
-            marker.addTo(map);
+                marker.addTo(map);
+            }
         }
+    }
     }
 }
 
@@ -312,29 +443,35 @@ function showMarkers() {
     for (let home_id in homes) {
         home = homes[home_id];
         const holdingName = home.home_name;
-
-        // Добавляем в словарь
-        if (holdingName) {
-            if (!holdingsDict[holdingName]) {
-                holdingsDict[holdingName] = [];
+        if (typeof  tasks[home_id] !== "undefined" ) {
+        if (tasks[home_id].length > 0) {
+            // Добавляем в словарь
+            if (holdingName) {
+                if (!holdingsDict[holdingName]) {
+                    holdingsDict[holdingName] = [];
+                }
+                holdingsDict[holdingName].push(home_id);
             }
-            holdingsDict[holdingName].push(home_id);
+
+            // Создание маркера
+
+            mark = createMarker(
+                map,
+                [home.lon, home.lat],
+                {
+                    home_id: home.home_id,
+                    home_name: home.home_name,
+                    home_address: home.home_address,
+                    status: home.status,
+                    markerRoundColor: houses_colors[home_id][0],
+                    markerCenterColor: houses_colors[home_id][1]
+                },
+                tasks[home_id]
+            );
+
+            markers[home_id] = mark;
         }
-
-        // Создание маркера
-        mark = createMarker(
-            map,
-            [home.lon, home.lat],
-            {
-                home_id: home.home_id,
-                home_name: home.home_name,
-                home_address: home.home_address,
-                markerColor: houses_colors[home_id]
-            },
-            tasks[home_id]
-        );
-
-        markers[home_id] = mark;
+        }
     }
 
     // Словарь: холдинг → кол-во невыполненных задач
@@ -357,7 +494,6 @@ function showMarkers() {
 
     // Преобразуем в массив [holding, count]
     let holdingsArray = Object.entries(holdingsTaskCounts);
-
     // Сортировка: сначала по убыванию количества задач, потом по алфавиту
     holdingsArray.sort((a, b) => {
         if (b[1] !== a[1]) {
@@ -444,9 +580,50 @@ document.addEventListener('change', function (e) {
             // Обновляем маркер
             const prev_color = houses_colors[data.home_id];
             houses_colors[data.home_id] = data.color;
+            console.log('current: ', houses_colors[data.home_id]);
+             console.log('prev: ', prev_color);
+             console.log('---');
 
             const marker = markers[data.home_id];
-            document.getElementById(`marker-${data.home_id}`).style.backgroundColor = data.color;
+            const markerHtml = `
+                <div id="marker-${data.home_id}" style="
+                    width: 28px;
+                    height: 28px;
+                    background-color: ${data.color[0]};
+                    border-radius: 50% 50% 50% 0;
+                    transform: rotate(-45deg);
+                    position: relative;
+                    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                "
+                onmouseover="this.style.transform='rotate(-45deg) scale(1.2)'; this.style.boxShadow='0 0 10px rgba(0,0,0,0.5)';"
+                onmouseout="this.style.transform='rotate(-45deg) scale(1)'; this.style.boxShadow='0 0 6px rgba(0,0,0,0.3)';"
+                >
+                    <div style="
+                        width: 20px;
+                    height: 20px;
+                    background-color: ${data.color[1]};
+                    border-radius: 50% 50% 50% 0;
+                    position: relative;
+                    box-shadow: 0 0 6px rgba(0, 0, 0, 0.3);
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    "
+                onmouseover="this.style.transform='rotate(0deg)'; this.style.background='white';"
+                onmouseout="this.style.transform='rotate(0deg) scale(1)'; this.style.background='${data.color[1]}';"></div>
+                </div>
+            `;
+            const customIcon = L.divIcon({
+                className: '',
+                html: markerHtml,
+            })
+            marker.setIcon(customIcon);
+
             if (marker) {
 
                 for (let j = 0; j < tasks[data.home_id].length; j++) {
@@ -460,12 +637,12 @@ document.addEventListener('change', function (e) {
                 for (let polygon_id of getPolygonsContainingPoint([lon, lat])) {
                         if (isChecked) {
                             polygonsData[polygon_id]['uncompleted'][0] -= 1;
-                            if (data.color == 'green') {
+                            if (checkbox.checked) {
                                  polygonsData[polygon_id]['uncompleted'][1] -= 1;
                             }
                         }
                         else {
-                            if (prev_color == 'green') {
+                            if (!checkbox.checked) {
                                  polygonsData[polygon_id]['uncompleted'][1] += 1;
                             }
                             polygonsData[polygon_id]['uncompleted'][0] += 1;

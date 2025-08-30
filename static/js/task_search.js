@@ -85,9 +85,8 @@ function filtring() {
 
     });
      let holdingFilter = document.getElementById('holding-filter');
-
-    if (holdingFilter) {
-        holdingFilter.addEventListener('change', function () {
+     let addressType = document.getElementById('address_type');
+     function changer() {
 
         let selectedHolding = holdingFilter.value;
         let homeBlocks = document.querySelectorAll('.toggle-home-button');
@@ -95,18 +94,20 @@ function filtring() {
         // Скрываем popup'ы и маркеры
         if (typeof hideMarkers === 'function') hideMarkers();
 
-        if (selectedHolding === 'all') {
+        if ((selectedHolding === 'all') && (addressType.value === 'ALL')) {
             if (typeof showMarkers === 'function') showMarkers();
         } else {
             if (typeof showSeveralMarkers === 'function') {
-                showSeveralMarkers(selectedHolding);
+                showSeveralMarkers(selectedHolding, addressType.value);
+                console.log(addressType.value);
             }
         }
 
         // Фильтрация списка задач
         homeBlocks.forEach(button => {
             const homeHolding = button.getAttribute('holding');
-            const shouldShow = selectedHolding === 'all' || homeHolding === selectedHolding;
+            const homeStatus = button.getAttribute('status');
+            const shouldShow = (selectedHolding === 'all' || homeHolding === selectedHolding) && (addressType.value == 'ALL' || addressType.value === homeStatus);
             button.parentElement.style.display = shouldShow ? 'block' : 'none';
         });
 
@@ -117,8 +118,21 @@ function filtring() {
         } else {
             holdingFilter.style.boxShadow = 'none';
         }
-    });
-}
+        if (addressType.value !== 'ALL') {
+            addressType.style.boxShadow = '0 0 8px 2px rgb(255, 126, 0)';
+            addressType.style.borderRadius = '5px';
+        } else {
+            addressType.style.boxShadow = 'none';
+        }
+    }
+
+    if (holdingFilter) {
+        holdingFilter.addEventListener('change', changer);
+    }
+    if (addressType) {
+        addressType.addEventListener('change', changer);
+    }
+
 
 
 

@@ -40,85 +40,111 @@ title.appendChild(link);
 
 
 
-    const fieldMap = isFullForm
+        const fieldMap = isFullForm
         ? { home_id: 'ID', home_name: 'Название', home_address: 'Адрес', latlon: 'Координаты (широта, долгота)' }
         : { home_id: 'ID', home_name: 'Название', home_address: 'Адрес', latlon: 'Координаты (широта, долгота)' };
 
-    const inputRefs = {};
+        const inputRefs = {};
 
-    for (const key in fieldMap) {
+        for (const key in fieldMap) {
+        // Особая обработка поля latlon
+        if (key === 'latlon') {
+        const label = document.createElement('label');
+        label.textContent = fieldMap[key];
+        label.style.display = 'block';
 
+        const combinedInput = document.createElement('input');
+        combinedInput.type = 'text';
+        combinedInput.name = 'latlon';
+        combinedInput.value = (
+        typeof fields.lat === 'number' && typeof fields.lon === 'number'
+        ) ? `${fields.lat}, ${fields.lon}` : '';
 
-    // Особая обработка поля latlon
-    if (key === 'latlon') {
-    const label = document.createElement('label');
-    label.textContent = fieldMap[key];
-    label.style.display = 'block';
+        combinedInput.style.width = '100%';
+        combinedInput.style.marginTop = '5px';
+        combinedInput.style.marginBottom = '10px';
+        combinedInput.style.display = 'block';
+        combinedInput.style.padding = '8px';
+        combinedInput.style.background = '#333';
+        combinedInput.style.border = '1px solid #555';
+        combinedInput.style.borderRadius = '5px';
+        combinedInput.style.color = '#fff';
 
-    const combinedInput = document.createElement('input');
-    combinedInput.type = 'text';
-    combinedInput.name = 'latlon';
-    combinedInput.value = (
-    typeof fields.lat === 'number' && typeof fields.lon === 'number'
-    ) ? `${fields.lat}, ${fields.lon}` : '';
+        inputRefs['latlon'] = combinedInput;
+        combinedInput.placeholder = fieldMap[key];
+        const coordinatePattern = /^\s*-?\d{1,3}(?:\.\d+)?\s*,\s*-?\d{1,3}(?:\.\d+)?\s*$/;
 
+        label.appendChild(combinedInput);
+        div.appendChild(label);
+        continue;
+    }
+        // Обычное поле
+        const label = document.createElement('label');
+        label.textContent = fieldMap[key];
 
-    combinedInput.style.width = '100%';
-    combinedInput.style.marginTop = '5px';
-    combinedInput.style.marginBottom = '10px';
-    combinedInput.style.display = 'block';
-    combinedInput.style.padding = '8px';
-    combinedInput.style.background = '#333';
-    combinedInput.style.border = '1px solid #555';
-    combinedInput.style.borderRadius = '5px';
-    combinedInput.style.color = '#fff';
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.name = key;
+        input.placeholder = fieldMap[key];
+        input.value = fields[key] !== undefined ? fields[key] : '';
+        //input.disabled = isFullForm && key === 'home_id';
+        if (key === 'home_id') {
+                input.type = 'number';
+                input.step = '1';            // Только целые числа
+                input.min = '1';
+                          input.addEventListener('input', () => {
+                    // Удаляем всё, кроме цифр
+                    input.value = input.value.replace(/\D/g, '');
+                });// Только положительные
+        }
+        input.style.marginBottom = '10px';
+        input.style.display = 'block';
+        input.style.width = '100%';
+        input.style.padding = '8px';
+        input.style.background = '#333';
+        input.style.border = '1px solid #555';
+        input.style.borderRadius = '5px';
+        input.style.color = '#fff';
 
-    inputRefs['latlon'] = combinedInput;
-    combinedInput.placeholder = fieldMap[key];
-    const coordinatePattern = /^\s*-?\d{1,3}(?:\.\d+)?\s*,\s*-?\d{1,3}(?:\.\d+)?\s*$/;
+        inputRefs[key] = input;
 
-
-    label.appendChild(combinedInput);
-    div.appendChild(label);
-    continue;
-}
-
-
-    // Обычное поле
-    const label = document.createElement('label');
-    label.textContent = fieldMap[key];
-
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.name = key;
-    input.placeholder = fieldMap[key];
-    input.value = fields[key] !== undefined ? fields[key] : '';
-    input.disabled = isFullForm && key === 'home_id';
-    if (key === 'home_id') {
-            input.type = 'number';
-            input.step = '1';            // Только целые числа
-            input.min = '1';
-                      input.addEventListener('input', () => {
-                // Удаляем всё, кроме цифр
-                input.value = input.value.replace(/\D/g, '');
-            });// Только положительные
+        div.appendChild(label);
+        div.appendChild(input);
     }
 
+    //
+    // Добавление двух горизонтальных чекбоксов
+    //
 
-    input.style.marginBottom = '10px';
-    input.style.display = 'block';
-    input.style.width = '100%';
-    input.style.padding = '8px';
-    input.style.background = '#333';
-    input.style.border = '1px solid #555';
-    input.style.borderRadius = '5px';
-    input.style.color = '#fff';
+    const checkboxContainer = document.createElement('div');
+    checkboxContainer.style.display = 'flex';
+    checkboxContainer.style.gap = '20px'; // Отступ между чекбоксами
 
-    inputRefs[key] = input;
+    // Первый чекбокс: "Печать"
+    const printLabel = document.createElement('label');
+    printLabel.textContent = "Печать";
+    const printInput = document.createElement('input');
+    printInput.type = 'checkbox';
+    printInput.name = 'print'; // Имя 'print'
+    printInput.checked = fields.print;
 
-    div.appendChild(label);
-    div.appendChild(input);
-}
+    printLabel.appendChild(printInput);
+    checkboxContainer.appendChild(printLabel);
+    // Второй чекбокс: "Подпись"
+    const signLabel = document.createElement('label');
+    signLabel.textContent = "Подпись";
+    const signInput = document.createElement('input');
+    signInput.type = 'checkbox';
+    signInput.name = 'sign'; // Имя 'sign'
+    signInput.checked = fields.sign;
+
+    signLabel.appendChild(signInput);
+    checkboxContainer.appendChild(signLabel);
+    inputRefs['sign'] = signInput;
+    inputRefs['print'] = printInput;
+
+    // Добавляем контейнер с чекбоксами в основной div
+    div.appendChild(checkboxContainer);
 
 
     // Карта, если есть координаты
@@ -242,9 +268,7 @@ latlonInput.addEventListener('blur', () => {
             confirmRemoving(fields.stuff_id, div);
         });
 
-        submitBtn.addEventListener('click', () => {
-            sendAddressUpdate(inputRefs, div, isFullForm, isFromMainList, isFullForm);
-        });
+
         div.appendChild(delBtn);
     }
 

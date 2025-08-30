@@ -3,14 +3,12 @@ document.addEventListener("DOMContentLoaded", function () {
   // Восстанавливаем значение из хэша, если есть
   if (window.location.hash) {
     const decoded = decodeURIComponent(window.location.hash.substring(1));
-    console.log(decoded);
+    console.log;
     if ([...select.options].some(option => option.value === decoded)) {
       select.value = decoded;
       let holdingFilter = document.getElementById('holding-filter');
 
     if (holdingFilter) {
-
-
         let selectedHolding = holdingFilter.value;
         let homeBlocks = document.querySelectorAll('.toggle-home-button');
 
@@ -21,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (typeof showMarkers === 'function') showMarkers();
         } else {
             if (typeof showSeveralMarkers === 'function') {
-                showSeveralMarkers(selectedHolding);
+                showSeveralMarkers(selectedHolding, document.getElementById('address_type').value);
             }
         }
 

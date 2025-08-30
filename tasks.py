@@ -314,6 +314,8 @@ class Address:
                 self.home_id = result["home_id"]
                 self.home_name = result["home_name"]
                 self.home_address = result["home_address"]
+                self.print = kwargs.get("print", 0)
+                self.sign = kwargs.get("sign", 0)
                 is_exist = self.is_exist(self.home_id)
 
                 if not is_exist:
@@ -328,6 +330,7 @@ class Address:
                                    "message": "ok"}
                         if not attempt.get("success", False):
                             self.message = attempt["message"]
+
                         self.is_valid = attempt.get("success", False)
                 else:
                     info = self.get_by_id(self.home_id)
@@ -335,6 +338,8 @@ class Address:
                     self.lat = info["lat"]
                     self.is_valid = info["is_valid"]
                     self.stuff_id = info["stuff_id"]
+                    self.print = info["print"]
+                    self.sign = info["sign"]
         elif kwargs.get("home_id", False):
             self.is_valid = Address.is_exist(kwargs.get("home_id", False))
             if not self.is_valid:
@@ -348,6 +353,8 @@ class Address:
                 self.home_address = r["home_address"]
                 self.lon = r["lon"]
                 self.lat = r["lat"]
+                self.print = r["print"]
+                self.sign = r["sign"]
 
 
     @staticmethod
@@ -369,7 +376,9 @@ class Address:
                 "home_address": record.home_address,
                 "lon": record.lon,
                 "lat": record.lat,
-                "stuff_id": record.stuff_id
+                "stuff_id": record.stuff_id,
+                "print": record.print,
+                "sign": record.sign
             }
         else:
             return {"is_valid": False}
@@ -382,7 +391,9 @@ class Address:
                     home_name=self.home_name,
                     home_address=self.home_address,
                     lon=self.lon,
-                    lat=self.lat
+                    lat=self.lat,
+                    print=self.print,
+                    sign=self.sign
                 )
                 session.add(new_adress)
                 session.commit()
@@ -391,7 +402,6 @@ class Address:
             return {
                 unsuccessful(f"Ошибка добавления адреса: ошибка {str(e.args)}")
             }
-        return True
 
     def __str__(self):
         if not self.is_valid:
@@ -405,7 +415,9 @@ class Address:
                 "home_name":self.home_name,
                 "home_address":self.home_address,
                 "lon":self.lon,
-                "lat":self.lat}
+                "lat":self.lat,
+                "print":self.print,
+                "sign":self.sign}
 
 class InvalidAddressError(Exception):
     pass
@@ -417,6 +429,7 @@ class Task:
         self.archieved = archieved
         self.task_id = task_id
         self.blank = blank
+        self.address = address
         self.correct_date(date)
         self.correct_location(address)
         self.get_lon_lan()
@@ -424,6 +437,7 @@ class Task:
         self.solution = solution
         self.ppr = ppr
         self._save_task_to_db()
+
 
     def correct_date(self, date):
         r = ' '.join(date.split(' ')[1:-1])

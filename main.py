@@ -1,6 +1,6 @@
-import io
+from color_settings import *
 import string
-import random
+
 import hashlib
 import openpyxl
 from flask import Flask, request, jsonify, render_template, json, redirect, url_for, abort, send_file
@@ -109,29 +109,44 @@ def generate_random_color():
 
 
 def get_home_status(home_id):
+    statuses = {(0, 0): "NPNS",
+                (0, 1): "NPS",
+                (1, 0): "PNS",
+                (1, 1): "PS"}
     all_completed = False
     lon = lat = None
-
+    colors = None
+    status = None
     with DBsession() as dbsession:
         try:
             # Всего задач по дому
+
             total_tasks = dbsession.query(func.count(TaskModel.task_id)).filter_by(home_id=home_id).scalar() or 0
 
             # Сколько задач выполнено (blank=1)
             completed_tasks = dbsession.query(func.count(TaskModel.task_id)).filter_by(home_id=home_id, blank=1).scalar() or 0
+            all_completed = (total_tasks == completed_tasks)
 
-            all_completed = (total_tasks > 0 and total_tasks == completed_tasks)
 
             # Получаем координаты
             address = dbsession.query(AddressModel).filter_by(home_id=home_id).first()
+
             if address:
                 lon = address.lon
                 lat = address.lat
+                status = statuses[(address.print, address.sign)]
+                colors = complited_colors[status][all_completed]
+
 
         except Exception as e:
             print(f"Ошибка в get_home_status: {str(e)}")
-
-    return (all_completed, lon, lat)
+    if status == 'SNP':
+        print(home_id)
+    return {"all_completed": all_completed,
+            "lon": lon,
+            "lat": lat,
+            "colors": colors,
+            "status": status}
 
 
 
@@ -359,11 +374,12 @@ def index():
                       "/ppr": 2}
 
         task_type = task_types[request.path]
-        ok_color = 'green'
-
         tasks = Task.get_tasks(archieved=True, task_type=task_type)
         from tasks import is_point_in_area
-        tasks_f = [task.__dict__() for task in tasks if is_point_in_area(task.lon_lan, current_user.get_checked_polygons_ids())]
+        tasks_f = []
+        pol = current_user.get_checked_polygons_ids()
+        tasks_f = [task.__dict__() for task in tasks if
+                   is_point_in_area(task.lon_lan, pol)]
         statuses = {str(task['task_id']): bool(task['blank']) for task in tasks_f}
         home_ids = [(task['home_id'],) for task in tasks_f]  # имитируем fetchall()
         houses_colors = {}
@@ -379,8 +395,9 @@ def index():
             }
         for i in home_ids:
             i = i[0]
-            color = ok_color if get_home_status(i)[0] else 'red'
-            houses_colors[i] = color
+            competed = get_home_status(i)
+            #color = ok_color if get_home_status(i)['all_completed'] else 'red'
+            houses_colors[i] = competed['colors']
         role = current_user.role
         house_points = []
         for home_id in houses_colors:
@@ -401,7 +418,9 @@ def index():
         with DBsession() as dbsession:
             for info in tasks_f:
                 home_id = info['home_id']
+
                 if home_id not in home_dict:
+                    st = get_home_status(home_id)
                     addr = dbsession.query(AddressModel).filter_by(home_id=home_id).first()
                     if addr:
                         home_dict[home_id] = {
@@ -410,14 +429,34 @@ def index():
                             "home_address": addr.home_address,
                             "lon": addr.lon,
                             "lat": addr.lat,
-                            "stuff_id": addr.stuff_id
+                            "stuff_id": addr.stuff_id,
+                            "status": st['status']
                         }
+
+
+
 
                 if home_id not in test_mode:
                     test_mode[home_id] = [info]
                 else:
                     test_mode[home_id].append(info)
-
+            addrs = dbsession.query(AddressModel).all()
+            for addr  in addrs:
+                home_id = addr.home_id
+                if addr.print or addr.sign:
+                    if home_id not in home_dict:
+                        st = get_home_status(home_id)
+                        home_dict[home_id] = {
+                            "home_id": addr.home_id,
+                            "home_name": addr.home_name,
+                            "home_address": addr.home_address,
+                            "lon": addr.lon,
+                            "lat": addr.lat,
+                            "stuff_id": addr.stuff_id,
+                            "status": st['status']
+                        }
+                        if home_id not in houses_colors:
+                            houses_colors[home_id] = st['colors']
         return render_template(
             "main.html",
             initial_statuses=statuses,
@@ -497,7 +536,6 @@ def update_task_status():
         return redirect('/logout')
     if role_weights.get(current_user.role, -100) < 0:
         return redirect('/logout')
-    ok_color = 'green'
     try:
         data = request.json
         task_id = int(data['task_id'])
@@ -518,9 +556,8 @@ def update_task_status():
 
             # Получаем home_id и пересчитываем статус
             home_id = task.home_id
-            n = get_home_status(home_id)[0]
-            color = 'red' if not n else ok_color
-
+            n = get_home_status(home_id)
+            color = n['colors']
         return jsonify({"status": "success", "task_id": task_id, "blank": int(status), "color": color, "home_id": home_id})
 
     except Exception as e:
@@ -677,7 +714,9 @@ def control_panel():
                 'home_address': a.home_address,
                 'lat': a.lat,
                 'lon': a.lon,
-                'stuff_id': a.stuff_id
+                'stuff_id': a.stuff_id,
+                "print": a.print,
+                "sign": a.sign
             })
     tasks_done = [i.__dict__() for i in filter(lambda x: x.blank, tasks)]
     tasks_not = [i.__dict__() for i in filter(lambda x: not x.blank, tasks)]
@@ -752,7 +791,8 @@ def submit_address():
     home_name = data.get("home_name")
     address = data.get("address")
     lonlat = data.get("lonlat")
-
+    print2 = (data.get("print", False))
+    sign = (data.get("sign", False))
     if not home_id:
         return jsonify(unsuccessful("нет ID здания"))
     if not home_name:
@@ -775,7 +815,10 @@ def submit_address():
             home.home_address = address
             home.lat = lat
             home.lon = lon
+            home.print = print2
+            home.sign = sign
             message = "Объект обновлён"
+
         else:
             # Создаём новый
             new_home = AddressModel(
@@ -783,7 +826,9 @@ def submit_address():
                 home_name=home_name,
                 home_address=address,
                 lat=lat,
-                lon=lon
+                lon=lon,
+                print=print2,
+                sign=sign
             )
             db.add(new_home)
             message = "Объект создан"
@@ -903,6 +948,26 @@ def toggle_auto_archive():
             settings.auto_archive_done_tasks = new_state
         dbsession.commit()
     return jsonify(success=True)
+
+@app.route('/complete_all_holding', methods=['POST'])
+@login_required
+def complete_all_holding():
+    data = request.json
+    home_ids = [int(i) for i in data['home_ids']]
+    status = 1
+    not_available = []
+    with DBsession() as dbsession:
+        should_archieved = dbsession.query(SettingsModel).filter_by(user_id=1).first()
+        for home_id in home_ids:
+            tasks = dbsession.query(TaskModel).filter_by(home_id=home_id, is_ppr=0, archieved=0).all()
+            for task in tasks:
+                task.blank = status
+                if should_archieved.auto_archive_done_tasks:
+                    task.archieved = 1
+                dbsession.commit()
+    return jsonify({"status": "success",
+                    "not_available": not_available}
+                   )
 
 
 @app.route('/set_task_archived', methods=['POST'])
@@ -1082,16 +1147,6 @@ def download_db():
     # Отправляем файл напрямую
     return send_file(db_path, as_attachment=True)
 
-@app.route('/about2')
-def about2():
-    return render_template('about.html',
-                           home_button={"icon": "🚀",
-                                        "title": "Вперёд!"},
-
-                           role_names=role_names,
-                           role_icons=role_icons,
-                           role_weights=role_weights
-                           )
 
 @app.route('/about')
 def about():

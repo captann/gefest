@@ -12,6 +12,8 @@ class AddressModel(Base):
     home_address = Column(Text, nullable=False)
     lon = Column(Float, nullable=False)
     lat = Column(Float, nullable=False)
+    sign = Column(Integer, default=0)
+    print = Column(Integer, default=0)
 
     # Связь: один адрес → много задач
     tasks = relationship("TaskModel", back_populates="address")
