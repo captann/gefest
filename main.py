@@ -416,6 +416,8 @@ def index():
         home_dict = {}
         test_mode = {}
         with DBsession() as dbsession:
+            settings = dbsession.query(SettingsModel).filter_by(user_id=current_user.user_id).first()
+
             for info in tasks_f:
                 home_id = info['home_id']
 
@@ -471,7 +473,8 @@ def index():
             tasks=test_mode,
             task_type=task_type,
             user_role_weight=role_weights.get(current_user.role, 0),
-            role_name=role_names.get(current_user.role, '')
+            role_name=role_names.get(current_user.role, ''),
+            settings=settings
         )
     else:
         pass
@@ -837,7 +840,34 @@ def submit_address():
 
     return jsonify(successful(message))
 
+@app.route('/show_all_important_markers', methods=['POST'])
+@login_required
+def show_all_important_markers():
+    current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
+    if role_weights.get(current_user.role, -100) < 2:
+        return redirect('/logout')
+    data = request.get_json()
 
+    current_user = User.get_by_id(session['user_id'])
+    if current_user is None:
+        return redirect('/logout')
+    if 'state' not in data:
+        return jsonify(success=False, message="Не передано состояние чекбокса")
+
+    new_state = bool(data['state'])
+
+    with DBsession() as dbsession:
+        settings = dbsession.query(SettingsModel).filter_by(user_id=current_user.user_id).first()
+
+        if not settings:
+            settings = SettingsModel(user_id=current_user.user_id, auto_archive_done_tasks=0, show_all_important_markers=new_state)
+            dbsession.add(settings)
+        else:
+            settings.show_all_important_markers = new_state
+        dbsession.commit()
+    return jsonify(status='success')
 @app.route('/from_file', methods=['POST'])
 def download_excel():
     global last_uploaded_sheet_name
@@ -923,15 +953,14 @@ def toggle_auto_archive():
     current_user = User.get_by_id(session['user_id'])
     if current_user is None:
         return redirect('/logout')
-    if role_weights.get(current_user.role, -100) < 0:
+    if role_weights.get(current_user.role, -100) < 2:
         return redirect('/logout')
     data = request.get_json()
 
     current_user = User.get_by_id(session['user_id'])
     if current_user is None:
         return redirect('/logout')
-    if current_user.role != "admin":
-        return redirect('/')
+
 
     if 'state' not in data:
         return jsonify(success=False, message="Не передано состояние чекбокса")
@@ -942,7 +971,7 @@ def toggle_auto_archive():
         settings = dbsession.query(SettingsModel).filter_by(user_id=current_user.user_id).first()
 
         if not settings:
-            settings = SettingsModel(user_id=current_user.user_id, auto_archive_done_tasks=new_state)
+            settings = SettingsModel(user_id=current_user.user_id, auto_archive_done_tasks=new_state,show_all_important_markers=0)
             dbsession.add(settings)
         else:
             settings.auto_archive_done_tasks = new_state

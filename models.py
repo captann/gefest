@@ -88,10 +88,9 @@ class SharedPolygonModel(Base):
 
 class SettingsModel(Base):
     __tablename__ = 'settings'
-
     user_id = Column(Integer, ForeignKey('users.user_id'), primary_key=True)
     auto_archive_done_tasks = Column(Boolean, default=False)
-
+    show_all_important_markers = Column(Boolean, default=False)
     user = relationship("UserModel", backref="settings")
 
 

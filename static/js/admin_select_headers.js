@@ -72,7 +72,6 @@ let selects = document.querySelectorAll('#syncHeaderMappingSection select');
 function applyDefaultColumnMapping2(mapping) {
     Object.entries(mapping).forEach(([name, value]) => {
         const select = document.querySelector(`#syncHeaderMappingSection select[name="sync_${name}"]`);
-        console.log(name, '→', select);  // для отладки
         if (select) select.value = value;
     });
 }

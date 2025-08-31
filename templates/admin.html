@@ -428,7 +428,12 @@
         {% endif %}
 
         <h2 style="margin-top: 30px;"id="addresses-section">Адреса</h2>
-
+    <div style="margin-top: 10px;">
+                <label style="cursor: pointer;">
+                    <input type="checkbox" id="show_all_important_markers" {% if settings and settings.show_all_important_markers %}checked{% endif %}>
+                    Показывать все важные маркеры
+                </label>
+            </div>
     <input type="text" id="addressSearch" placeholder="Поиск ..." >
         <div id="allAddressesContainer"></div>
 
@@ -443,12 +448,12 @@
         </div>
         {% if user_role_weight > 1 %}
 
-            <div style="margin-top: 10px;">
+           <!-- <div style="margin-top: 10px;">
                 <label style="cursor: pointer;">
                     <input type="checkbox" id="autoArchiveToggle" {% if settings and settings.auto_archive_done_tasks %}checked{% endif %}>
                     Автоматически архивировать выполненные задачи
                 </label>
-            </div>
+            </div> -->
         {% endif %}
 
 
@@ -549,6 +554,7 @@ const tasks_not = {{ tasks_not | tojson }};
 const tasks_done = {{ tasks_done | tojson }};
 const allAddresses = {{ addresses | tojson }};
 const user_role_weight = {{ user_role_weight }};
+const show_all_important_markers = {{ settings.show_all_important_markers | tojson}};
 </script>
 <script src="{{ url_for('static', filename='js/admin_loading.js') }}"></script>
 
@@ -572,7 +578,7 @@ const user_role_weight = {{ user_role_weight }};
 <script src="{{ url_for('static', filename='js/admin_search_address.js') }}"></script>
 <script src="{{ url_for('static', filename='js/admin_sync.js') }}"></script>
 <script src="{{ url_for('static', filename='js/already_exist.js') }}"></script>
-<script src="{{ url_for('static', filename='js/update_role.js') }}"></script>
+<script src="{{ url_for('static', filename='js/show_all_important_markers.js') }}"></script>
 {% if user_role_weight > 1 %}
 <script src="{{ url_for('static', filename='js/for_upload_type.js') }}"></script>
 {% endif %}

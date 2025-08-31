@@ -273,7 +273,7 @@ function showMarkers() {
         home = homes[home_id];
         const holdingName = home.home_name;
         if (typeof  tasks[home_id] !== "undefined" ) {
-        if (tasks[home_id].length > 0) {
+        if ((tasks[home_id].length > 0)) {
             // Добавляем в словарь
             if (holdingName) {
                 if (!holdingsDict[holdingName]) {
@@ -300,8 +300,27 @@ function showMarkers() {
 
             markers[home_id] = mark;
         }
+
+        } else {
+        if (show_all_important_markers) {
+        mark = createMarker(
+                map,
+                [home.lon, home.lat],
+                {
+                    home_id: home.home_id,
+                    home_name: home.home_name,
+                    home_address: home.home_address,
+                    status: home.status,
+                    markerRoundColor: houses_colors[home_id][0],
+                    markerCenterColor: houses_colors[home_id][1]
+                },
+                tasks[home_id]
+            );
+
+            markers[home_id] = mark;
+            }
+            }
         }
-    }
 
     // Словарь: холдинг → кол-во невыполненных задач
     const holdingsTaskCounts = {};

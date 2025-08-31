@@ -57,7 +57,6 @@ if (!myLocationBtn) {
 
 
     let showingPanel = false;
-    console.log("Адаптация загружена");
 
   if (!mapContainer) {
     console.warn("map_ не найден!");
