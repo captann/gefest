@@ -643,6 +643,14 @@ def register():
 
                     session['user_id'] = new_user.user_id
                     session['user_role'] = new_user.role
+                    with DBsession() as dbsession:
+                        settings = dbsession.query(SettingsModel).filter_by(user_id=new_user.user_id).first()
+
+                        if not settings:
+                            settings = SettingsModel(user_id=new_user.user_id, auto_archive_done_tasks=0,
+                                                     show_all_important_markers=0)
+                            dbsession.add(settings)
+                            dbsession.commit()
 
                     resp = make_response(redirect(url_for('index')))
             if not error:
